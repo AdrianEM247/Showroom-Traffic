@@ -24,7 +24,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-/* ── Header ── */
+/* ââ Header ââ */
 .header {
   background: var(--primary);
   color: white;
@@ -54,7 +54,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 }
 .btn-logout:hover { background: rgba(255,255,255,0.2); }
 
-/* ── Login ── */
+/* ââ Login ââ */
 .login-container {
   display: flex;
   align-items: center;
@@ -105,10 +105,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* ── Main Content ── */
+/* ââ Main Content ââ */
 .main { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
-/* ── Dealer Form ── */
+/* ââ Dealer Form ââ */
 .week-selector {
   display: flex;
   align-items: center;
@@ -270,7 +270,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   border-radius: 8px;
 }
 
-/* ── Admin Dashboard ── */
+/* ââ Admin Dashboard ââ */
 .admin-tabs {
   display: flex;
   gap: 4px;
@@ -403,45 +403,45 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 </head>
 <body>
 
-<!-- ── LOGIN ── -->
+<!-- ââ LOGIN ââ -->
 <div id="loginScreen" class="login-container">
   <div class="login-card">
-    <h1>🚗 Showroom Traffic</h1>
-    <p>OMODA & JAECOO — Týždenný reporting návštevnosti</p>
+    <h1>ð Showroom Traffic</h1>
+    <p>OMODA & JAECOO â TÃ½Å¾dennÃ½ reporting nÃ¡vÅ¡tevnosti</p>
     <select id="loginDealer">
-      <option value="">— Vyberte dílerstvo —</option>
+      <option value="">â Vyberte dÃ­lerstvo â</option>
     </select>
-    <button class="btn-primary" id="loginBtn" disabled>Prihlásiť sa</button>
+    <button class="btn-primary" id="loginBtn" disabled>PrihlÃ¡siÅ¥ sa</button>
   </div>
 </div>
 
-<!-- ── HEADER ── -->
+<!-- ââ HEADER ââ -->
 <div id="appHeader" class="header hidden">
   <div class="header-brand">
-    <h1>🚗 Showroom Traffic</h1>
-    <span>O&J Týždenný report</span>
+    <h1>ð Showroom Traffic</h1>
+    <span>O&J TÃ½Å¾dennÃ½ report</span>
   </div>
   <div class="header-user">
     <span class="dealer-name" id="headerDealer"></span>
-    <button class="btn-logout" onclick="logout()">Odhlásiť</button>
+    <button class="btn-logout" onclick="logout()">OdhlÃ¡siÅ¥</button>
   </div>
 </div>
 
-<!-- ── DEALER VIEW ── -->
+<!-- ââ DEALER VIEW ââ -->
 <div id="dealerView" class="main hidden">
   <div class="week-selector">
-    <label>Týždeň:</label>
+    <label>TÃ½Å¾deÅ:</label>
     <select id="weekSelect" onchange="loadDealerWeek()"></select>
-    <span id="weekStatus" class="week-status pending">Neodoslaný</span>
+    <span id="weekStatus" class="week-status pending">NeodoslanÃ½</span>
   </div>
 
   <div class="form-card">
-    <h3>Návštevnosť & výkon podľa modelov</h3>
+    <h3>NÃ¡vÅ¡tevnosÅ¥ & vÃ½kon podÄ¾a modelov</h3>
     <div class="model-grid">
       <div class="header-cell"></div>
-      <div class="header-cell">Návštevy</div>
+      <div class="header-cell">NÃ¡vÅ¡tevy</div>
       <div class="header-cell">Test. jazdy</div>
-      <div class="header-cell">Objednávky</div>
+      <div class="header-cell">ObjednÃ¡vky</div>
     </div>
     <div id="modelRows"></div>
     <div class="form-totals" id="formTotals">
@@ -453,30 +453,30 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   </div>
 
   <div class="form-card">
-    <h3>Veková štruktúra návštevníkov</h3>
+    <h3>VekovÃ¡ Å¡truktÃºra nÃ¡vÅ¡tevnÃ­kov</h3>
     <div class="age-grid">
-      <div class="age-group"><label>18–30</label><input type="number" min="0" id="age1830" value="0" oninput="updateTotals()"></div>
-      <div class="age-group"><label>31–45</label><input type="number" min="0" id="age3145" value="0" oninput="updateTotals()"></div>
-      <div class="age-group"><label>46–60</label><input type="number" min="0" id="age4660" value="0" oninput="updateTotals()"></div>
+      <div class="age-group"><label>18â30</label><input type="number" min="0" id="age1830" value="0" oninput="updateTotals()"></div>
+      <div class="age-group"><label>31â45</label><input type="number" min="0" id="age3145" value="0" oninput="updateTotals()"></div>
+      <div class="age-group"><label>46â60</label><input type="number" min="0" id="age4660" value="0" oninput="updateTotals()"></div>
       <div class="age-group"><label>60+</label><input type="number" min="0" id="age60plus" value="0" oninput="updateTotals()"></div>
     </div>
   </div>
 
   <div class="form-card">
-    <h3>Poznámky / komentáre</h3>
-    <textarea class="notes-area" id="notes" placeholder="Voliteľné — čokoľvek relevantné k tomuto týždňu..."></textarea>
+    <h3>PoznÃ¡mky / komentÃ¡re</h3>
+    <textarea class="notes-area" id="notes" placeholder="VoliteÄ¾nÃ© â ÄokoÄ¾vek relevantnÃ© k tomuto tÃ½Å¾dÅu..."></textarea>
   </div>
 
   <div class="form-actions">
-    <button class="btn btn-secondary" onclick="clearForm()">Vymazať</button>
-    <button class="btn btn-save" onclick="submitReport()">💾 Uložiť report</button>
+    <button class="btn btn-secondary" onclick="clearForm()">VymazaÅ¥</button>
+    <button class="btn btn-save" onclick="submitReport()">ð¾ UloÅ¾iÅ¥ report</button>
   </div>
 </div>
 
-<!-- ── ADMIN VIEW ── -->
+<!-- ââ ADMIN VIEW ââ -->
 <div id="adminView" class="main hidden">
   <div class="admin-tabs">
-    <button class="admin-tab active" onclick="switchAdminTab('overview')">Prehľad</button>
+    <button class="admin-tab active" onclick="switchAdminTab('overview')">PrehÄ¾ad</button>
     <button class="admin-tab" onclick="switchAdminTab('compare')">Porovnanie</button>
     <button class="admin-tab" onclick="switchAdminTab('models')">Modely</button>
   </div>
@@ -484,9 +484,9 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   <!-- Overview Tab -->
   <div id="tabOverview">
     <div class="export-bar">
-      <label style="font-weight:600;font-size:14px">Týždeň:</label>
+      <label style="font-weight:600;font-size:14px">TÃ½Å¾deÅ:</label>
       <select id="adminWeekSelect" onChange="loadAdminData()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
-      <button class="btn btn-secondary" onclick="exportExcel()" style="margin-left:auto">📥 Export Excel</button>
+      <button class="btn btn-secondary" onclick="exportExcel()" style="margin-left:auto">ð¥ Export Excel</button>
     </div>
 
     <div class="stats-row" id="statsRow"></div>
@@ -497,12 +497,12 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   <!-- Compare Tab -->
   <div id="tabCompare" class="hidden">
     <div class="export-bar">
-      <label style="font-weight:600;font-size:14px">Porovnať:</label>
+      <label style="font-weight:600;font-size:14px">PorovnaÅ¥:</label>
       <select id="compareWeek1" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
       <span style="font-weight:600">vs</span>
       <select id="compareWeek2" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
-      <button class="btn btn-secondary" onclick="loadComparison()">Porovnať</button>
-      <button class="btn btn-secondary" onclick="exportCompareExcel()">📥 Export</button>
+      <button class="btn btn-secondary" onclick="loadComparison()">PorovnaÅ¥</button>
+      <button class="btn btn-secondary" onclick="exportCompareExcel()">ð¥ Export</button>
     </div>
     <div id="compareTable"></div>
   </div>
@@ -510,7 +510,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   <!-- Models Tab -->
   <div id="tabModels" class="hidden">
     <div class="export-bar">
-      <label style="font-weight:600;font-size:14px">Týždeň:</label>
+      <label style="font-weight:600;font-size:14px">TÃ½Å¾deÅ:</label>
       <select id="modelsWeekSelect" onchange="loadModelsTab()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
     </div>
     <div id="modelsTable"></div>
@@ -525,7 +525,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ── Firebase Config ──
+// ââ Firebase Config ââ
 const firebaseConfig = {
   apiKey: "AIzaSyDfa4A67RV4PB7V3xmZKR8V2tGabXK8LIw",
   authDomain: "ga-vehicles.firebaseapp.com",
@@ -538,7 +538,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ── Config ──
+// ââ Config ââ
 const MODELS = [
   { id: 'omoda5', name: 'Omoda 5', brand: 'omoda' },
   { id: 'omoda5_shsh', name: 'Omoda 5 SHS-H', brand: 'omoda' },
@@ -555,31 +555,31 @@ const MODELS = [
 
 const DEALERS = [
   { code: 'OSK0130', name: 'Albex Plus (Nitra)' },
-  { code: 'OSK0040', name: 'Auto Becchi (Žilina)' },
-  { code: 'OSK0100', name: 'Auto Rácz (Levice)' },
-  { code: 'OSK0140', name: 'Auto Swam (Košice-Barca)' },
+  { code: 'OSK0040', name: 'Auto Becchi (Å½ilina)' },
+  { code: 'OSK0100', name: 'Auto RÃ¡cz (Levice)' },
+  { code: 'OSK0140', name: 'Auto Swam (KoÅ¡ice-Barca)' },
   { code: 'OSK0021', name: 'Autostyl (Bratislava)' },
-  { code: 'OSK0022', name: 'Autostyl (Trenčianska Turná)' },
+  { code: 'OSK0022', name: 'Autostyl (TrenÄianska TurnÃ¡)' },
   { code: 'OSK0030', name: 'Autovendy (Plavnica)' },
-  { code: 'OSK0050', name: 'Autoviba (Lučenec)' },
-  { code: 'OSK0160', name: 'Béhr & Béhr (Trnava)' },
-  { code: 'OSK0011', name: 'Built (Košice)' },
-  { code: 'OSK0012', name: 'Built (Prešov)' },
+  { code: 'OSK0050', name: 'Autoviba (LuÄenec)' },
+  { code: 'OSK0160', name: 'BÃ©hr & BÃ©hr (Trnava)' },
+  { code: 'OSK0011', name: 'Built (KoÅ¡ice)' },
+  { code: 'OSK0012', name: 'Built (PreÅ¡ov)' },
   { code: 'OSK0060', name: 'Final CD (Bratislava)' },
   { code: 'OSK0070', name: 'J.M. (Martin)' },
-  { code: 'OSK0080', name: 'Lion Car (Banská Bystrica)' },
-  { code: 'OSK0090', name: 'M.A.N. (Komárno)' },
+  { code: 'OSK0080', name: 'Lion Car (BanskÃ¡ Bystrica)' },
+  { code: 'OSK0090', name: 'M.A.N. (KomÃ¡rno)' },
   { code: 'OSK0151', name: 'Motorbox (Bojnice)' },
-  { code: 'OSK0150', name: 'Motorbox (Topoľčany)' },
-  { code: 'OSK0110', name: 'Unicar (Liptovský Mikuláš)' },
+  { code: 'OSK0150', name: 'Motorbox (TopoÄ¾Äany)' },
+  { code: 'OSK0110', name: 'Unicar (LiptovskÃ½ MikulÃ¡Å¡)' },
   { code: 'OSK0120', name: 'Winkler (Michalovce)' },
 ];
 
-// ── State ──
+// ââ State ââ
 let currentDealer = null;
 let isAdmin = false;
 
-// ── Week Utils ──
+// ââ Week Utils ââ
 function getWeekNumber(d) {
   const date = new Date(d);
   date.setHours(0,0,0,0);
@@ -592,7 +592,7 @@ function getWeekDates(year, week) {
   const jan4 = new Date(year, 0, 4);
   const d = new Date(jan4.getTime() + ((week - 1) * 7 - (jan4.getDay() + 5) % 7) * 86400000);
   const end = new Date(d); end.setDate(d.getDate() + 4);
-  return `${d.getDate()}.${d.getMonth()+1}. – ${end.getDate()}.${end.getMonth()+1}.${end.getFullYear()}`;
+  return `${d.getDate()}.${d.getMonth()+1}. â ${end.getDate()}.${end.getMonth()+1}.${end.getFullYear()}`;
 }
 
 function generateWeekOptions() {
@@ -618,12 +618,12 @@ function populateWeekSelects() {
   if (cw2 && cw2.options.length > 1) cw2.selectedIndex = 1;
 }
 
-// ── Login ──
+// ââ Login ââ
 function initLogin() {
   const select = document.getElementById('loginDealer');
-  const adminOpt = '<option value="ADMIN">── ADMIN ──</option>';
+  const adminOpt = '<option value="ADMIN">ââ ADMIN ââ</option>';
   const dealerOpts = DEALERS.map(d => `<option value="${d.code}">${d.name}</option>`).join('');
-  select.innerHTML = '<option value="">— Vyberte dílerstvo —</option>' + dealerOpts + '<optgroup label="─────────">' + adminOpt + '</optgroup>';
+  select.innerHTML = '<option value="">â Vyberte dÃ­lerstvo â</option>' + dealerOpts + '<optgroup label="âââââââââ">' + adminOpt + '</optgroup>';
 
   select.onchange = () => {
     document.getElementById('loginBtn').disabled = !select.value;
@@ -679,7 +679,7 @@ function logout() {
   document.getElementById('loginBtn').disabled = true;
 }
 
-// ── Dealer Form ──
+// ââ Dealer Form ââ
 function buildModelForm() {
   const container = document.getElementById('modelRows');
   let html = '';
@@ -781,16 +781,16 @@ async function loadDealerWeek() {
     const snap = await db.ref(`showroom_traffic/${weekKey}/${currentDealer.code}`).once('value');
     if (snap.exists()) {
       setFormData(snap.val());
-      statusEl.textContent = 'Odoslaný ✓';
+      statusEl.textContent = 'OdoslanÃ½ â';
       statusEl.className = 'week-status submitted';
     } else {
       clearForm();
-      statusEl.textContent = 'Neodoslaný';
+      statusEl.textContent = 'NeodoslanÃ½';
       statusEl.className = 'week-status pending';
     }
   } catch (err) {
     console.error(err);
-    showToast('Chyba pri načítaní dát', 'error');
+    showToast('Chyba pri naÄÃ­tanÃ­ dÃ¡t', 'error');
   }
 }
 
@@ -799,21 +799,21 @@ async function submitReport() {
   const data = getFormData();
 
   if (data.totalNav === 0 && data.totalTJ === 0 && data.totalObj === 0) {
-    if (!confirm('Všetky hodnoty sú nulové. Naozaj chcete odoslať prázdny report?')) return;
+    if (!confirm('VÅ¡etky hodnoty sÃº nulovÃ©. Naozaj chcete odoslaÅ¥ prÃ¡zdny report?')) return;
   }
 
   try {
     await db.ref(`showroom_traffic/${weekKey}/${currentDealer.code}`).set(data);
-    document.getElementById('weekStatus').textContent = 'Odoslaný ✓';
+    document.getElementById('weekStatus').textContent = 'OdoslanÃ½ â';
     document.getElementById('weekStatus').className = 'week-status submitted';
-    showToast('Report úspešne uložený!', 'success');
+    showToast('Report ÃºspeÅ¡ne uloÅ¾enÃ½!', 'success');
   } catch (err) {
     console.error(err);
-    showToast('Chyba pri ukladaní: ' + err.message, 'error');
+    showToast('Chyba pri ukladanÃ­: ' + err.message, 'error');
   }
 }
 
-// ── Admin ──
+// ââ Admin ââ
 async function loadAdminData() {
   const weekKey = document.getElementById('adminWeekSelect').value;
 
@@ -833,10 +833,10 @@ async function loadAdminData() {
     const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
 
     document.getElementById('statsRow').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">Ø ${(totalNav / Math.max(reported,1)).toFixed(1)} / díler</div></div>
+      <div class="stat-card"><div class="stat-label">NÃ¡vÅ¡tevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">Ã ${(totalNav / Math.max(reported,1)).toFixed(1)} / dÃ­ler</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
-      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
-      <div class="stat-card"><div class="stat-label">Reportovalo</div><div class="stat-value">${reported} / ${DEALERS.length}</div><div class="stat-sub ${reported < DEALERS.length ? 'stat-red' : 'stat-green'}">${reported < DEALERS.length ? 'Chýba ' + (DEALERS.length - reported) + ' díler' + (DEALERS.length - reported > 1 && DEALERS.length - reported < 5 ? 'i' : 'ov') : 'Kompletné ✓'}</div></div>
+      <div class="stat-card"><div class="stat-label">ObjednÃ¡vky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z nÃ¡vÅ¡tev</div></div>
+      <div class="stat-card"><div class="stat-label">Reportovalo</div><div class="stat-value">${reported} / ${DEALERS.length}</div><div class="stat-sub ${reported < DEALERS.length ? 'stat-red' : 'stat-green'}">${reported < DEALERS.length ? 'ChÃ½ba ' + (DEALERS.length - reported) + ' dÃ­ler' + (DEALERS.length - reported > 1 && DEALERS.length - reported < 5 ? 'i' : 'ov') : 'KompletnÃ© â'}</div></div>
     `;
 
     // Tracking - who's missing
@@ -844,7 +844,7 @@ async function loadAdminData() {
     if (missing.length > 0) {
       document.getElementById('trackingSection').innerHTML = `
         <div class="form-card" style="border-left:4px solid var(--warning)">
-          <h3 style="border:none;margin:0;padding:0">⚠️ Nereportovali (${missing.length})</h3>
+          <h3 style="border:none;margin:0;padding:0">â ï¸ Nereportovali (${missing.length})</h3>
           <p style="color:var(--text-light);font-size:13px;margin-top:8px">${missing.map(d => d.name).join(', ')}</p>
         </div>`;
     } else {
@@ -863,12 +863,12 @@ async function loadAdminData() {
           <td>${d.totalObj || 0}</td>
           <td>${d.totalNav > 0 ? Math.round((d.totalTJ||0)/(d.totalNav)*100) : 0}%</td>
           <td>${(d.age?.['18_30']||0)}</td><td>${(d.age?.['31_45']||0)}</td><td>${(d.age?.['46_60']||0)}</td><td>${(d.age?.['60_plus']||0)}</td>
-          <td><span class="status-badge status-done">✓</span></td>
+          <td><span class="status-badge status-done">â</span></td>
         </tr>`;
       } else {
         rows += `<tr style="opacity:0.5">
-          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
-          <td><span class="status-badge status-missing">✗</span></td>
+          <td>${dealer.name}</td><td>â</td><td>â</td><td>â</td><td>â</td><td>â</td><td>â</td><td>â</td><td>â</td>
+          <td><span class="status-badge status-missing">â</span></td>
         </tr>`;
       }
     });
@@ -885,17 +885,17 @@ async function loadAdminData() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
+        <tr><th>DÃ­ler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
         ${rows}
       </table>`;
 
   } catch (err) {
     console.error(err);
-    showToast('Chyba pri načítaní admin dát', 'error');
+    showToast('Chyba pri naÄÃ­tanÃ­ admin dÃ¡t', 'error');
   }
 }
 
-// ── Compare Tab ──
+// ââ Compare Tab ââ
 async function loadComparison() {
   const w1 = document.getElementById('compareWeek1').value;
   const w2 = document.getElementById('compareWeek2').value;
@@ -922,17 +922,17 @@ async function loadComparison() {
 
       t1n+=an;t1t+=at;t1o+=ao;t2n+=bn;t2t+=bt;t2o+=bo;
 
-      const fmt = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
+      const fmt = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : 'â';
 
       rows += `<tr>
         <td>${dealer.name}</td>
-        <td>${an||'–'}</td><td>${at||'–'}</td><td>${ao||'–'}</td>
-        <td>${bn||'–'}</td><td>${bt||'–'}</td><td>${bo||'–'}</td>
+        <td>${an||'â'}</td><td>${at||'â'}</td><td>${ao||'â'}</td>
+        <td>${bn||'â'}</td><td>${bt||'â'}</td><td>${bo||'â'}</td>
         <td>${fmt(dn)}</td><td>${fmt(dt)}</td><td>${fmt(dobj)}</td>
       </tr>`;
     });
 
-    const fmtT = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
+    const fmtT = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : 'â';
     rows += `<tr class="total-row">
       <td>SPOLU</td>
       <td>${t1n}</td><td>${t1t}</td><td>${t1o}</td>
@@ -942,18 +942,18 @@ async function loadComparison() {
 
     document.getElementById('compareTable').innerHTML = `
       <table class="data-table">
-        <tr><th rowspan="2">Díler</th><th colspan="3">${w1Label.split('(')[0].trim()}</th><th colspan="3">${w2Label.split('(')[0].trim()}</th><th colspan="3">Δ Zmena</th></tr>
+        <tr><th rowspan="2">DÃ­ler</th><th colspan="3">${w1Label.split('(')[0].trim()}</th><th colspan="3">${w2Label.split('(')[0].trim()}</th><th colspan="3">Î Zmena</th></tr>
         <tr><th>Nav</th><th>TJ</th><th>Obj</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Nav</th><th>TJ</th><th>Obj</th></tr>
         ${rows}
       </table>`;
 
   } catch (err) {
     console.error(err);
-    showToast('Chyba pri načítaní porovnania', 'error');
+    showToast('Chyba pri naÄÃ­tanÃ­ porovnania', 'error');
   }
 }
 
-// ── Models Tab ──
+// ââ Models Tab ââ
 async function loadModelsTab() {
   const weekKey = document.getElementById('modelsWeekSelect').value;
 
@@ -989,17 +989,17 @@ async function loadModelsTab() {
 
     document.getElementById('modelsTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Objednávky</th><th>Konverzia TJ</th></tr>
+        <tr><th>Model</th><th>NÃ¡vÅ¡tevy</th><th>Test. jazdy</th><th>ObjednÃ¡vky</th><th>Konverzia TJ</th></tr>
         ${rows}
       </table>`;
 
   } catch (err) {
     console.error(err);
-    showToast('Chyba pri načítaní modelov', 'error');
+    showToast('Chyba pri naÄÃ­tanÃ­ modelov', 'error');
   }
 }
 
-// ── Admin Tab Switch ──
+// ââ Admin Tab Switch ââ
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
@@ -1011,13 +1011,13 @@ function switchAdminTab(tab) {
   if (tab === 'models') loadModelsTab();
 }
 
-// ── Excel Export ──
+// ââ Excel Export ââ
 function exportExcel() {
   // Collect data from current admin table and export as CSV (simple approach)
   const table = document.querySelector('#dealerTable table');
   if (!table) return;
 
-  let csv = '﻿'; // BOM for Excel
+  let csv = 'ï»¿'; // BOM for Excel
   table.querySelectorAll('tr').forEach(row => {
     const cells = Array.from(row.querySelectorAll('th, td')).map(c => '"' + c.textContent.replace(/"/g, '""').trim() + '"');
     csv += cells.join(';') + '\n';
@@ -1025,21 +1025,21 @@ function exportExcel() {
 
   const weekLabel = document.getElementById('adminWeekSelect').selectedOptions[0].text.split('(')[0].trim();
   downloadFile(csv, `Showroom_Traffic_${weekLabel}.csv`, 'text/csv;charset=utf-8');
-  showToast('Export stiahnutý', 'success');
+  showToast('Export stiahnutÃ½', 'success');
 }
 
 function exportCompareExcel() {
   const table = document.querySelector('#compareTable table');
   if (!table) return;
 
-  let csv = '﻿';
+  let csv = 'ï»¿';
   table.querySelectorAll('tr').forEach(row => {
     const cells = Array.from(row.querySelectorAll('th, td')).map(c => '"' + c.textContent.replace(/"/g, '""').trim() + '"');
     csv += cells.join(';') + '\n';
   });
 
   downloadFile(csv, 'Showroom_Traffic_Porovnanie.csv', 'text/csv;charset=utf-8');
-  showToast('Export stiahnutý', 'success');
+  showToast('Export stiahnutÃ½', 'success');
 }
 
 function downloadFile(content, filename, type) {
@@ -1052,7 +1052,7 @@ function downloadFile(content, filename, type) {
   URL.revokeObjectURL(url);
 }
 
-// ── Toast ──
+// ââ Toast ââ
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1060,7 +1060,7 @@ function showToast(msg, type = '') {
   setTimeout(() => { t.className = 'toast'; }, 3000);
 }
 
-// ── Init ──
+// ââ Init ââ
 initLogin();
 </script>
 </body>
