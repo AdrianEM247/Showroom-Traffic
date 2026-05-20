@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O&J Showroom Traffic</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a1a2e;
+  --accent: #c8102e;
+  --accent-light: #e8384f;
+  --bg: #f5f5f7;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --text-light: #6b7280;
+  --border: #e5e7eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Header ── */
+.header {
+  background: var(--primary);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.header-brand h1 { font-size: 18px; font-weight: 600; }
+.header-brand span { font-size: 12px; color: #9ca3af; font-weight: 400; }
+.header-user { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.header-user .dealer-name { color: var(--accent-light); font-weight: 600; }
+.btn-logout {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Login ── */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, #16213e 100%);
+}
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 48px 40px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  text-align: center;
+}
+.login-card h1 { font-size: 24px; margin-bottom: 8px; color: var(--primary); }
+.login-card p { color: var(--text-light); margin-bottom: 32px; font-size: 14px; }
+.login-card select, .login-card input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+  appearance: auto;
+}
+.login-card select:focus, .login-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Main Content ── */
+.main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* ── Dealer Form ── */
+.week-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.week-selector label { font-weight: 600; font-size: 14px; }
+.week-selector select {
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.week-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.week-status.submitted { background: #d1fae5; color: #065f46; }
+.week-status.pending { background: #fef3c7; color: #92400e; }
+
+.form-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.form-card h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.brand-omoda { background: #fee2e2; color: #991b1b; }
+.brand-jaecoo { background: #dbeafe; color: #1e40af; }
+
+.model-grid {
+  display: grid;
+  grid-template-columns: 180px repeat(3, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+.model-grid .header-cell {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-light);
+  text-align: center;
+  padding: 4px;
+}
+.model-grid .model-name {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+}
+.model-grid input[type="number"] {
+  width: 100%;
+  padding: 10px 8px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.model-grid input:focus { outline: none; border-color: var(--accent); }
+.model-grid input::-webkit-inner-spin-button { opacity: 1; }
+
+.model-row-total {
+  font-weight: 700;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.age-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.age-group { text-align: center; }
+.age-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 6px; }
+.age-group input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  font-family: inherit;
+}
+.age-group input:focus { outline: none; border-color: var(--accent); }
+
+.notes-area {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  min-height: 80px;
+  resize: vertical;
+}
+.notes-area:focus { outline: none; border-color: var(--accent); }
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: flex-end;
+}
+.btn {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-save { background: var(--accent); color: white; }
+.btn-save:hover { background: var(--accent-light); }
+.btn-secondary { background: var(--bg); color: var(--text); border: 2px solid var(--border); }
+.btn-secondary:hover { background: #e5e7eb; }
+
+.form-totals {
+  display: grid;
+  grid-template-columns: 180px repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 2px solid var(--primary);
+}
+.form-totals .total-label { font-weight: 700; font-size: 14px; padding: 8px 0; }
+.form-totals .total-value {
+  font-weight: 700;
+  font-size: 16px;
+  text-align: center;
+  color: var(--accent);
+  padding: 8px;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+/* ── Admin Dashboard ── */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--card);
+  padding: 4px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.admin-tab {
+  flex: 1;
+  padding: 10px 16px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.admin-tab.active { background: var(--primary); color: white; }
+.admin-tab:hover:not(.active) { background: var(--bg); }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.stat-card .stat-label { font-size: 12px; color: var(--text-light); font-weight: 500; text-transform: uppercase; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+.stat-card .stat-sub { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.stat-green { color: var(--success); }
+.stat-red { color: var(--danger); }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  font-size: 13px;
+}
+.data-table th {
+  background: var(--primary);
+  color: white;
+  padding: 12px 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.data-table th:first-child { text-align: left; padding-left: 16px; }
+.data-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td:first-child { text-align: left; padding-left: 16px; font-weight: 500; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr.total-row { background: #fef2f2; font-weight: 700; }
+.data-table tr.total-row td { border-top: 2px solid var(--accent); }
+.data-table tr:hover:not(.total-row) { background: #f9fafb; }
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.status-done { background: #d1fae5; color: #065f46; }
+.status-missing { background: #fecaca; color: #991b1b; }
+
+.delta-pos { color: var(--success); font-weight: 600; }
+.delta-neg { color: var(--danger); font-weight: 600; }
+
+.export-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--primary);
+  color: white;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 200;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+  .model-grid { grid-template-columns: 140px repeat(3, 1fr); gap: 4px; }
+  .model-grid input[type="number"] { padding: 8px 4px; font-size: 13px; }
+  .age-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .main { padding: 16px; }
+  .form-card { padding: 16px; }
+  .header { padding: 12px 16px; }
+  .header-brand h1 { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen" class="login-container">
+  <div class="login-card">
+    <h1>🚗 Showroom Traffic</h1>
+    <p>OMODA & JAECOO — Týždenný reporting návštevnosti</p>
+    <select id="loginDealer">
+      <option value="">— Vyberte dílerstvo —</option>
+    </select>
+    <button class="btn-primary" id="loginBtn" disabled>Prihlásiť sa</button>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<div id="appHeader" class="header hidden">
+  <div class="header-brand">
+    <h1>🚗 Showroom Traffic</h1>
+    <span>O&J Týždenný report</span>
+  </div>
+  <div class="header-user">
+    <span class="dealer-name" id="headerDealer"></span>
+    <button class="btn-logout" onclick="logout()">Odhlásiť</button>
+  </div>
+</div>
+
+<!-- ── DEALER VIEW ── -->
+<div id="dealerView" class="main hidden">
+  <div class="week-selector">
+    <label>Týždeň:</label>
+    <select id="weekSelect" onchange="loadDealerWeek()"></select>
+    <span id="weekStatus" class="week-status pending">Neodoslaní</span>
+  </div>
+
+  <div class="form-card">
+    <h3>Návštevnosť & výkon podľa modelov</h3>
+    <div class="model-grid">
+      <div class="header-cell"></div>
+      <div class="header-cell">Návštevy</div>
+      <div class="header-cell">Test. jazdy</div>
+      <div class="header-cell">Objednávky</div>
+    </div>
+    <div id="modelRows"></div>
+    <div class="form-totals" id="formTotals">
+      <div class="total-label">SPOLU</div>
+      <div class="total-value" id="totalNav">0</div>
+      <div class="total-value" id="totalTJ">0</div>
+      <div class="total-value" id="totalObj">0</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>Veková štruktúra návštevníkov</h3>
+    <div class="age-grid">
+      <div class="age-group"><label>18–30</label><input type="number" min="0" id="age1830" value="0" oninput="updateTotals()"></div>
+      <div class="age-group"><label>31–45</label><input type="number" min="0" id="age3145" value="0" oninput="updateTotals()"></div>
+      <div class="age-group"><label>46–60</label><input type="number" min="0" id="age4660" value="0" oninput="updateTotals()"></div>
+      <div class="age-group"><label>60+</label><input type="number" min="0" id="age60plus" value="0" oninput="updateTotals()"></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>Poznámky / komentáre</h3>
+    <textarea class="notes-area" id="notes" placeholder="Voliteľné — čokoľvek relevantné k tomuto týždňu..."></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-secondary" onclick="clearForm()">Vymazať</button>
+    <button class="btn btn-save" onclick="submitReport()">💾 Uložiť report</button>
+  </div>
+</div>
+
+<!-- ── ADMIN VIEW ── -->
+<div id="adminView" class="main hidden">
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchAdminTab('overview')">Prehľad</button>
+    <button class="admin-tab" onclick="switchAdminTab('compare')">Porovnanie</button>
+    <button class="admin-tab" onclick="switchAdminTab('models')">Modely</button>
+  </div>
+
+  <!-- Overview Tab -->
+  <div id="tabOverview">
+    <div class="export-bar">
+      <label style="font-weight:600;font-size:14px">Týždeň:</label>
+      <select id="adminWeekSelect" onChange="loadAdminData()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+      <button class="btn btn-secondary" onclick="exportExcel()" style="margin-left:auto">📥 Export Excel</button>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+    <div id="trackingSection"></div>
+    <div style="margin-top:16px" id="dealerTable"></div>
+  </div>
+
+  <!-- Compare Tab -->
+  <div id="tabCompare" class="hidden">
+    <div class="export-bar">
+      <label style="font-weight:600;font-size:14px">Porovnať:</label>
+      <select id="compareWeek1" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+      <span style="font-weight:600">vs</span>
+      <select id="compareWeek2" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+      <button class="btn btn-secondary" onclick="loadComparison()">Porovnať</button>
+      <button class="btn btn-secondary" onclick="exportCompareExcel()">📥 Export</button>
+    </div>
+    <div id="compareTable"></div>
+  </div>
+
+  <!-- Models Tab -->
+  <div id="tabModels" class="hidden">
+    <div class="export-bar">
+      <label style="font-weight:600;font-size:14px">Týždeň:</label>
+      <select id="modelsWeekSelect" onchange="loadModelsTab()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+    </div>
+    <div id="modelsTable"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// ── Firebase Config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyDfa4A67RV4PB7V3xmZKR8V2tGabXK8LIw",
+  authDomain: "ga-vehicles.firebaseapp.com",
+  databaseURL: "https://ga-vehicles-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ga-vehicles",
+  storageBucket: "ga-vehicles.firebasestorage.app",
+  messagingSenderId: "1046010459397",
+  appId: "1:1046010459397:web:289cf4fff293622a7b736c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ── Config ──
+const MODELS = [
+  { id: 'omoda5', name: 'Omoda 5', brand: 'omoda' },
+  { id: 'omoda5_shsh', name: 'Omoda 5 SHS-H', brand: 'omoda' },
+  { id: 'omoda5_ev', name: 'Omoda 5 EV', brand: 'omoda' },
+  { id: 'omoda9_shs', name: 'Omoda 9 SHS', brand: 'omoda' },
+  { id: 'jaecoo5', name: 'Jaecoo 5', brand: 'jaecoo' },
+  { id: 'jaecoo5_hev', name: 'Jaecoo 5 HEV', brand: 'jaecoo' },
+  { id: 'jaecoo5_ev', name: 'Jaecoo 5 EV', brand: 'jaecoo' },
+  { id: 'jaecoo7', name: 'Jaecoo 7', brand: 'jaecoo' },
+  { id: 'jaecoo7_shs', name: 'Jaecoo 7 SHS', brand: 'jaecoo' },
+  { id: 'jaecoo7_hev', name: 'Jaecoo 7 HEV', brand: 'jaecoo' },
+  { id: 'jaecoo8_shs', name: 'Jaecoo 8 SHS', brand: 'jaecoo' },
+];
+
+const DEALERS = [
+  { code: 'OSK0100', name: 'Auto Rácz (Komárno)' },
+  { code: 'OSK0021', name: 'Autostyl (Bratislava)' },
+  { code: 'OSK0022', name: 'Autostyl (Trenčín)' },
+  { code: 'OSK0030', name: 'Autovendy (Prievidza)' },
+  { code: 'OSK0050', name: 'Autoviba (Lučenec)' },
+  { code: 'OSK0040', name: 'Auto Becchi (Nitra)' },
+  { code: 'OSK0011', name: 'Built (Košice)' },
+  { code: 'OSK0012', name: 'Built (Prešov)' },
+  { code: 'OSK0060', name: 'Final CD (Žilina)' },
+  { code: 'OSK0070', name: 'J.M. (Martin)' },
+  { code: 'OSK0080', name: 'Lion Car (Trnava)' },
+  { code: 'OSK0090', name: 'M.A.N. (Levice)' },
+  { code: 'OSK0151', name: 'Motorbox (Bojnice)' },
+  { code: 'OSK0150', name: 'Motorbox (Topoľčany)' },
+  { code: 'OSK0110', name: 'Unicar (Banská Bystrica)' },
+  { code: 'OSK0120', name: 'Winkler (Liptovský Mikuláš)' },
+];
+
+// ── State ──
+let currentDealer = null;
+let isAdmin = false;
+
+// ── Week Utils ──
+function getWeekNumber(d) {
+  const date = new Date(d);
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return { year: date.getFullYear(), week: 1 + Math.round(((date - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7) };
+}
+
+function getWeekDates(year, week) {
+  const jan4 = new Date(year, 0, 4);
+  const d = new Date(jan4.getTime() + ((week - 1) * 7 - (jan4.getDay() + 5) % 7) * 86400000);
+  const end = new Date(d); end.setDate(d.getDate() + 4);
+  return `${d.getDate()}.${d.getMonth()+1}. – ${end.getDate()}.${end.getMonth()+1}.${end.getFullYear()}`;
+}
+
+function generateWeekOptions() {
+  const now = getWeekNumber(new Date());
+  const options = [];
+  for (let w = now.week; w >= Math.max(1, now.week - 8); w--) {
+    const key = `${now.year}_CW${String(w).padStart(2,'0')}`;
+    const label = `T${w} (${getWeekDates(now.year, w)})`;
+    options.push({ key, label, week: w });
+  }
+  return options;
+}
+
+function populateWeekSelects() {
+  const opts = generateWeekOptions();
+  const html = opts.map(o => `<option value="${o.key}">${o.label}</option>`).join('');
+  ['weekSelect', 'adminWeekSelect', 'compareWeek1', 'compareWeek2', 'modelsWeekSelect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+  // Set compare week2 to second option
+  const cw2 = document.getElementById('compareWeek2');
+  if (cw2 && cw2.options.length > 1) cw2.selectedIndex = 1;
+}
+
+// ── Login ──
+function initLogin() {
+  const select = document.getElementById('loginDealer');
+  const adminOpt = '<option value="ADMIN">── ADMIN ──</option>';
+  const dealerOpts = DEALERS.map(d => `<option value="${d.code}">${d.name}</option>`).join('');
+  select.innerHTML = '<option value="">— Vyberte dílerstvo —</option>' + dealerOpts + '<optgroup label="─────────">' + adminOpt + '</optgroup>';
+
+  select.onchange = () => {
+    document.getElementById('loginBtn').disabled = !select.value;
+  };
+
+  document.getElementById('loginBtn').onclick = () => {
+    const code = select.value;
+    if (!code) return;
+
+    if (code === 'ADMIN') {
+      isAdmin = true;
+      currentDealer = null;
+      showAdmin();
+    } else {
+      isAdmin = false;
+      currentDealer = DEALERS.find(d => d.code === code);
+      showDealer();
+    }
+  };
+}
+
+function showDealer() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appHeader').classList.remove('hidden');
+  document.getElementById('dealerView').classList.remove('hidden');
+  document.getElementById('adminView').classList.add('hidden');
+  document.getElementById('headerDealer').textContent = currentDealer.name;
+
+  populateWeekSelects();
+  buildModelForm();
+  loadDealerWeek();
+}
+
+function showAdmin() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appHeader').classList.remove('hidden');
+  document.getElementById('dealerView').classList.add('hidden');
+  document.getElementById('adminView').classList.remove('hidden');
+  document.getElementById('headerDealer').textContent = 'ADMIN';
+
+  populateWeekSelects();
+  loadAdminData();
+}
+
+function logout() {
+  currentDealer = null;
+  isAdmin = false;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appHeader').classList.add('hidden');
+  document.getElementById('dealerView').classList.add('hidden');
+  document.getElementById('adminView').classList.add('hidden');
+  document.getElementById('loginDealer').value = '';
+  document.getElementById('loginBtn').disabled = true;
+}
+
+// ── Dealer Form ──
+function buildModelForm() {
+  const container = document.getElementById('modelRows');
+  let html = '';
+  let lastBrand = '';
+
+  MODELS.forEach(m => {
+    if (m.brand !== lastBrand) {
+      const brandLabel = m.brand === 'omoda' ? '<span class="brand-tag brand-omoda">OMODA</span>' : '<span class="brand-tag brand-jaecoo">JAECOO</span>';
+      if (lastBrand) html += '<div style="height:12px"></div>';
+      html += `<div class="model-grid" style="margin-bottom:2px"><div style="padding:4px 0">${brandLabel}</div><div></div><div></div><div></div></div>`;
+      lastBrand = m.brand;
+    }
+    html += `
+      <div class="model-grid">
+        <div class="model-name">${m.name}</div>
+        <input type="number" min="0" id="${m.id}_nav" value="0" oninput="updateTotals()">
+        <input type="number" min="0" id="${m.id}_tj" value="0" oninput="updateTotals()">
+        <input type="number" min="0" id="${m.id}_obj" value="0" oninput="updateTotals()">
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function updateTotals() {
+  let nav = 0, tj = 0, obj = 0;
+  MODELS.forEach(m => {
+    nav += parseInt(document.getElementById(`${m.id}_nav`).value) || 0;
+    tj += parseInt(document.getElementById(`${m.id}_tj`).value) || 0;
+    obj += parseInt(document.getElementById(`${m.id}_obj`).value) || 0;
+  });
+  document.getElementById('totalNav').textContent = nav;
+  document.getElementById('totalTJ').textContent = tj;
+  document.getElementById('totalObj').textContent = obj;
+}
+
+function getFormData() {
+  const models = {};
+  MODELS.forEach(m => {
+    const nav = parseInt(document.getElementById(`${m.id}_nav`).value) || 0;
+    const tjs = parseInt(document.getElementById(`${m.id}_tj`).value) || 0;
+    const objs = parseInt(document.getElementById(`${m.id}_obj`).value) || 0;
+    if (nav || tjs || objs) {
+      models[m.id] = { nav, tj: tjs, obj: objs };
+    }
+  });
+
+  return {
+    dealerCode: currentDealer.code,
+    dealerName: currentDealer.name,
+    models,
+    age: {
+      '18_30': parseInt(document.getElementById('age1830').value) || 0,
+      '31_45': parseInt(document.getElementById('age3145').value) || 0,
+      '46_60': parseInt(document.getElementById('age4660').value) || 0,
+      '60_plus': parseInt(document.getElementById('age60plus').value) || 0,
+    },
+    notes: document.getElementById('notes').value.trim(),
+    submittedAt: new Date().toISOString(),
+    totalNav: parseInt(document.getElementById('totalNav').textContent) || 0,
+    totalTJ: parseInt(document.getElementById('totalTJ').textContent) || 0,
+    totalObj: parseInt(document.getElementById('totalObj').textContent) || 0,
+  };
+}
+
+function setFormData(data) {
+  MODELS.forEach(m => {
+    const md = data.models && data.models[m.id];
+    document.getElementById(`${m.id}_nav`).value = md ? md.nav || 0 : 0;
+    document.getElementById(`${m.id}_tj`).value = md ? md.tj || 0 : 0;
+    document.getElementById(`${m.id}_obj`).value = md ? md.obj || 0 : 0;
+  });
+  document.getElementById('age1830').value = data.age ? data.age['18_30'] || 0 : 0;
+  document.getElementById('age3145').value = data.age ? data.age['31_45'] || 0 : 0;
+  document.getElementById('age4660').value = data.age ? data.age['46_60'] || 0 : 0;
+  document.getElementById('age60plus').value = data.age ? data.age['60_plus'] || 0 : 0;
+  document.getElementById('notes').value = data.notes || '';
+  updateTotals();
+}
+
+function clearForm() {
+  MODELS.forEach(m => {
+    document.getElementById(`${m.id}_nav`).value = 0;
+    document.getElementById(`${m.id}_tj`).value = 0;
+    document.getElementById(`${m.id}_obj`).value = 0;
+  });
+  document.getElementById('age1830').value = 0;
+  document.getElementById('age3145').value = 0;
+  document.getElementById('age4660').value = 0;
+  document.getElementById('age60plus').value = 0;
+  document.getElementById('notes').value = '';
+  updateTotals();
+}
+
+async function loadDealerWeek() {
+  const weekKey = document.getElementById('weekSelect').value;
+  const statusEl = document.getElementById('weekStatus');
+
+  try {
+    const snap = await db.ref(`showroom_traffic/${weekKey}/${currentDealer.code}`).once('value');
+    if (snap.exists()) {
+      setFormData(snap.val());
+      statusEl.textContent = 'Odoslaný ✓';
+      statusEl.className = 'week-status submitted';
+    } else {
+      clearForm();
+      statusEl.textContent = 'Neodoslaný';
+      statusEl.className = 'week-status pending';
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Chyba pri načítaní dát', 'error');
+  }
+}
+
+async function submitReport() {
+  const weekKey = document.getElementById('weekSelect').value;
+  const data = getFormData();
+
+  if (data.totalNav === 0 && data.totalTJ === 0 && data.totalObj === 0) {
+    if (!confirm('Všetky hodnoty sú nulové. Naozaj chcete odoslať prázdny report?')) return;
+  }
+
+  try {
+    await db.ref(`showroom_traffic/${weekKey}/${currentDealer.code}`).set(data);
+    document.getElementById('weekStatus').textContent = 'Odoslaný ✓';
+    document.getElementById('weekStatus').className = 'week-status submitted';
+    showToast('Report úspešne uložený!', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Chyba pri ukladaní: ' + err.message, 'error');
+  }
+}
+
+// ── Admin ──
+async function loadAdminData() {
+  const weekKey = document.getElementById('adminWeekSelect').value;
+
+  try {
+    const snap = await db.ref(`showroom_traffic/${weekKey}`).once('value');
+    const data = snap.val() || {};
+
+    // Stats
+    const reported = Object.keys(data).length;
+    let totalNav = 0, totalTJ = 0, totalObj = 0;
+    Object.values(data).forEach(d => {
+      totalNav += d.totalNav || 0;
+      totalTJ += d.totalTJ || 0;
+      totalObj += d.totalObj || 0;
+    });
+
+    const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">Ø ${(totalNav / Math.max(reported,1)).toFixed(1)} / díler</div></div>
+      <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
+      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
+      <div class="stat-card"><div class="stat-label">Reportovalo</div><div class="stat-value">${reported} / ${DEALERS.length}</div><div class="stat-sub ${reported < DEALERS.length ? 'stat-red' : 'stat-green'}">${reported < DEALERS.length ? 'Chýba ' + (DEALERS.length - reported) + ' díler' + (DEALERS.length - reported > 1 && DEALERS.length - reported < 5 ? 'i' : 'ov') : 'Kompletné ✓'}</div></div>
+    `;
+
+    // Tracking - who's missing
+    const missing = DEALERS.filter(d => !data[d.code]);
+    if (missing.length > 0) {
+      document.getElementById('trackingSection').innerHTML = `
+        <div class="form-card" style="border-left:4px solid var(--warning)">
+          <h3 style="border:none;margin:0;padding:0">⚠️ Nereportovali (${missing.length})</h3>
+          <p style="color:var(--text-light);font-size:13px;margin-top:8px">${missing.map(d => d.name).join(', ')}</p>
+        </div>`;
+    } else {
+      document.getElementById('trackingSection').innerHTML = '';
+    }
+
+    // Dealer table
+    let rows = '';
+    DEALERS.forEach(dealer => {
+      const d = data[dealer.code];
+      if (d) {
+        rows += `<tr>
+          <td>${dealer.name}</td>
+          <td><strong>${d.totalNav || 0}</strong></td>
+          <td>${d.totalTJ || 0}</td>
+          <td>${d.totalObj || 0}</td>
+          <td>${d.totalNav > 0 ? Math.round((d.totalTJ||0)/(d.totalNav)*100) : 0}%</td>
+          <td>${(d.age?.['18_30']||0)}</td><td>${(d.age?.['31_45']||0)}</td><td>${(d.age?.['46_60']||0)}</td><td>${(d.age?.['60_plus']||0)}</td>
+          <td><span class="status-badge status-done">✓</span></td>
+        </tr>`;
+      } else {
+        rows += `<tr style="opacity:0.5">
+          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
+          <td><span class="status-badge status-missing">✗</span></td>
+        </tr>`;
+      }
+    });
+
+    rows += `<tr class="total-row">
+      <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObj}</td>
+      <td>${convTJ}%</td>
+      <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['18_30']||0),0)}</td>
+      <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['31_45']||0),0)}</td>
+      <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['46_60']||0),0)}</td>
+      <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['60_plus']||0),0)}</td>
+      <td>${reported}/${DEALERS.length}</td>
+    </tr>`;
+
+    document.getElementById('dealerTable').innerHTML = `
+      <table class="data-table">
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
+        ${rows}
+      </table>`;
+
+  } catch (err) {
+    console.error(err);
+    showToast('Chyba pri načítaní admin dát', 'error');
+  }
+}
+
+// ── Compare Tab ──
+async function loadComparison() {
+  const w1 = document.getElementById('compareWeek1').value;
+  const w2 = document.getElementById('compareWeek2').value;
+
+  try {
+    const [snap1, snap2] = await Promise.all([
+      db.ref(`showroom_traffic/${w1}`).once('value'),
+      db.ref(`showroom_traffic/${w2}`).once('value'),
+    ]);
+    const d1 = snap1.val() || {};
+    const d2 = snap2.val() || {};
+
+    const w1Label = document.getElementById('compareWeek1').selectedOptions[0].text;
+    const w2Label = document.getElementById('compareWeek2').selectedOptions[0].text;
+
+    let rows = '';
+    let t1n=0,t1t=0,t1o=0,t2n=0,t2t=0,t2o=0;
+
+    DEALERS.forEach(dealer => {
+      const a = d1[dealer.code], b = d2[dealer.code];
+      const an = a?.totalNav||0, at = a?.totalTJ||0, ao = a?.totalObj||0;
+      const bn = b?.totalNav||0, bt = b?.totalTJ||0, bo = b?.totalObj||0;
+      const dn = bn-an, dt = bt-at, dobj = bo-ao;
+
+      t1n+=an;t1t+=at;t1o+=ao;t2n+=bn;t2t+=bt;t2o+=bo;
+
+      const fmt = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
+
+      rows += `<tr>
+        <td>${dealer.name}</td>
+        <td>${an||'–'}</td><td>${at||'–'}</td><td>${ao||'–'}</td>
+        <td>${bn||'–'}</td><td>${bt||'–'}</td><td>${bo||'–'}</td>
+        <td>${fmt(dn)}</td><td>${fmt(dt)}</td><td>${fmt(dobj)}</td>
+      </tr>`;
+    });
+
+    const fmtT = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
+    rows += `<tr class="total-row">
+      <td>SPOLU</td>
+      <td>${t1n}</td><td>${t1t}</td><td>${t1o}</td>
+      <td>${t2n}</td><td>${t2t}</td><td>${t2o}</td>
+      <td>${fmtT(t2n-t1n)}</td><td>${fmtT(t2t-t1t)}</td><td>${fmtT(t2o-t1o)}</td>
+    </tr>`;
+
+    document.getElementById('compareTable').innerHTML = `
+      <table class="data-table">
+        <tr><th rowspan="2">Díler</th><th colspan="3">${w1Label.split('(')[0].trim()}</th><th colspan="3">${w2Label.split('(')[0].trim()}</th><th colspan="3">Δ Zmena</th></tr>
+        <tr><th>Nav</th><th>TJ</th><th>Obj</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Nav</th><th>TJ</th><th>Obj</th></tr>
+        ${rows}
+      </table>`;
+
+  } catch (err) {
+    console.error(err);
+    showToast('Chyba pri načítaní porovnania', 'error');
+  }
+}
+
+// ── Models Tab ──
+async function loadModelsTab() {
+  const weekKey = document.getElementById('modelsWeekSelect').value;
+
+  try {
+    const snap = await db.ref(`showroom_traffic/${weekKey}`).once('value');
+    const data = snap.val() || {};
+
+    const modelTotals = {};
+    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, obj: 0 }; });
+
+    Object.values(data).forEach(dealer => {
+      if (dealer.models) {
+        Object.entries(dealer.models).forEach(([mid, vals]) => {
+          if (modelTotals[mid]) {
+            modelTotals[mid].nav += vals.nav || 0;
+            modelTotals[mid].tj += vals.tj || 0;
+            modelTotals[mid].obj += vals.obj || 0;
+          }
+        });
+      }
+    });
+
+    let rows = '';
+    let tn=0, tt=0, to2=0;
+    MODELS.forEach(m => {
+      const v = modelTotals[m.id];
+      const conv = v.nav > 0 ? Math.round(v.tj/v.nav*100) : 0;
+      const brand = m.brand === 'omoda' ? '<span class="brand-tag brand-omoda">O</span>' : '<span class="brand-tag brand-jaecoo">J</span>';
+      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.obj}</td><td>${conv}%</td></tr>`;
+      tn += v.nav; tt += v.tj; to2 += v.obj;
+    });
+    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${to2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td></tr>`;
+
+    document.getElementById('modelsTable').innerHTML = `
+      <table class="data-table">
+        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Objednávky</th><th>Konverzia TJ</th></tr>
+        ${rows}
+      </table>`;
+
+  } catch (err) {
+    console.error(err);
+    showToast('Chyba pri načítaní modelov', 'error');
+  }
+}
+
+// ── Admin Tab Switch ──
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.getElementById('tabOverview').classList.toggle('hidden', tab !== 'overview');
+  document.getElementById('tabCompare').classList.toggle('hidden', tab !== 'compare');
+  document.getElementById('tabModels').classList.toggle('hidden', tab !== 'models');
+
+  if (tab === 'models') loadModelsTab();
+}
+
+// ── Excel Export ──
+function exportExcel() {
+  // Collect data from current admin table and export as CSV (simple approach)
+  const table = document.querySelector('#dealerTable table');
+  if (!table) return;
+
+  let csv = '﻿'; // BOM for Excel
+  table.querySelectorAll('tr').forEach(row => {
+    const cells = Array.from(row.querySelectorAll('th, td')).map(c => '"' + c.textContent.replace(/"/g, '""').trim() + '"');
+    csv += cells.join(';') + '\n';
+  });
+
+  const weekLabel = document.getElementById('adminWeekSelect').selectedOptions[0].text.split('(')[0].trim();
+  downloadFile(csv, `Showroom_Traffic_${weekLabel}.csv`, 'text/csv;charset=utf-8');
+  showToast('Export stiahnutý', 'success');
+}
+
+function exportCompareExcel() {
+  const table = document.querySelector('#compareTable table');
+  if (!table) return;
+
+  let csv = '﻿';
+  table.querySelectorAll('tr').forEach(row => {
+    const cells = Array.from(row.querySelectorAll('th, td')).map(c => '"' + c.textContent.replace(/"/g, '""').trim() + '"');
+    csv += cells.join(';') + '\n';
+  });
+
+  downloadFile(csv, 'Showroom_Traffic_Porovnanie.csv', 'text/csv;charset=utf-8');
+  showToast('Export stiahnutý', 'success');
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Toast ──
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+// ── Init ──
+initLogin();
+</script>
+</body>
+</html>
