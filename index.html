@@ -432,7 +432,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   <div class="week-selector">
     <label>Týždeň:</label>
     <select id="weekSelect" onchange="loadDealerWeek()"></select>
-    <span id="weekStatus" class="week-status pending">Neodoslaní</span>
+    <span id="weekStatus" class="week-status pending">Neodoslaný</span>
   </div>
 
   <div class="form-card">
@@ -543,33 +543,36 @@ const MODELS = [
   { id: 'omoda5', name: 'Omoda 5', brand: 'omoda' },
   { id: 'omoda5_shsh', name: 'Omoda 5 SHS-H', brand: 'omoda' },
   { id: 'omoda5_ev', name: 'Omoda 5 EV', brand: 'omoda' },
-  { id: 'omoda9_shs', name: 'Omoda 9 SHS', brand: 'omoda' },
+  { id: 'omoda9_shsp', name: 'Omoda 9 SHS-P', brand: 'omoda' },
   { id: 'jaecoo5', name: 'Jaecoo 5', brand: 'jaecoo' },
-  { id: 'jaecoo5_hev', name: 'Jaecoo 5 HEV', brand: 'jaecoo' },
+  { id: 'jaecoo5_shsh', name: 'Jaecoo 5 SHS-H', brand: 'jaecoo' },
   { id: 'jaecoo5_ev', name: 'Jaecoo 5 EV', brand: 'jaecoo' },
   { id: 'jaecoo7', name: 'Jaecoo 7', brand: 'jaecoo' },
   { id: 'jaecoo7_shs', name: 'Jaecoo 7 SHS', brand: 'jaecoo' },
-  { id: 'jaecoo7_hev', name: 'Jaecoo 7 HEV', brand: 'jaecoo' },
+  { id: 'jaecoo7_shsh', name: 'Jaecoo 7 SHS-H', brand: 'jaecoo' },
   { id: 'jaecoo8_shs', name: 'Jaecoo 8 SHS', brand: 'jaecoo' },
 ];
 
 const DEALERS = [
-  { code: 'OSK0100', name: 'Auto Rácz (Komárno)' },
+  { code: 'OSK0130', name: 'Albex Plus (Nitra)' },
+  { code: 'OSK0040', name: 'Auto Becchi (Žilina)' },
+  { code: 'OSK0100', name: 'Auto Rácz (Levice)' },
+  { code: 'OSK0140', name: 'Auto Swam (Košice-Barca)' },
   { code: 'OSK0021', name: 'Autostyl (Bratislava)' },
-  { code: 'OSK0022', name: 'Autostyl (Trenčín)' },
-  { code: 'OSK0030', name: 'Autovendy (Prievidza)' },
+  { code: 'OSK0022', name: 'Autostyl (Trenčianska Turná)' },
+  { code: 'OSK0030', name: 'Autovendy (Plavnica)' },
   { code: 'OSK0050', name: 'Autoviba (Lučenec)' },
-  { code: 'OSK0040', name: 'Auto Becchi (Nitra)' },
+  { code: 'OSK0160', name: 'Béhr & Béhr (Trnava)' },
   { code: 'OSK0011', name: 'Built (Košice)' },
   { code: 'OSK0012', name: 'Built (Prešov)' },
-  { code: 'OSK0060', name: 'Final CD (Žilina)' },
+  { code: 'OSK0060', name: 'Final CD (Bratislava)' },
   { code: 'OSK0070', name: 'J.M. (Martin)' },
-  { code: 'OSK0080', name: 'Lion Car (Trnava)' },
-  { code: 'OSK0090', name: 'M.A.N. (Levice)' },
+  { code: 'OSK0080', name: 'Lion Car (Banská Bystrica)' },
+  { code: 'OSK0090', name: 'M.A.N. (Komárno)' },
   { code: 'OSK0151', name: 'Motorbox (Bojnice)' },
   { code: 'OSK0150', name: 'Motorbox (Topoľčany)' },
-  { code: 'OSK0110', name: 'Unicar (Banská Bystrica)' },
-  { code: 'OSK0120', name: 'Winkler (Liptovský Mikuláš)' },
+  { code: 'OSK0110', name: 'Unicar (Liptovský Mikuláš)' },
+  { code: 'OSK0120', name: 'Winkler (Michalovce)' },
 ];
 
 // ── State ──
