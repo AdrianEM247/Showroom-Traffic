@@ -524,6 +524,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ── Firebase Config ──
@@ -1015,44 +1016,39 @@ function switchAdminTab(tab) {
 }
 
 // ── Excel Export ──
+function tableToXlsx(table, filename) {
+  const data = [];
+  table.querySelectorAll('tr').forEach(row => {
+    const cells = Array.from(row.querySelectorAll('th, td')).map(c => {
+      const txt = c.textContent.trim();
+      const num = txt.replace('%', '').replace(/,/g, '.');
+      if (txt === '-' || txt === '') return txt;
+      if (!isNaN(num) && num !== '') return Number(num);
+      return txt;
+    });
+    data.push(cells);
+  });
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const colWidths = data[0].map((_, i) => ({wch: Math.max(...data.map(r => String(r[i] || '').length)) + 2}));
+  ws['!cols'] = colWidths;
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  XLSX.writeFile(wb, filename);
+}
+
 function exportExcel() {
-  // Collect data from current admin table and export as CSV (simple approach)
   const table = document.querySelector('#dealerTable table');
   if (!table) return;
-
-  let csv = '﻿'; // BOM for Excel
-  table.querySelectorAll('tr').forEach(row => {
-    const cells = Array.from(row.querySelectorAll('th, td')).map(c => '"' + c.textContent.replace(/"/g, '""').trim() + '"');
-    csv += cells.join(';') + '\n';
-  });
-
   const weekLabel = document.getElementById('adminWeekSelect').selectedOptions[0].text.split('(')[0].trim();
-  downloadFile(csv, `Showroom_Traffic_${weekLabel}.csv`, 'text/csv;charset=utf-8');
+  tableToXlsx(table, `Showroom_Traffic_${weekLabel}.xlsx`);
   showToast('Export stiahnutý', 'success');
 }
 
 function exportCompareExcel() {
   const table = document.querySelector('#compareTable table');
   if (!table) return;
-
-  let csv = '﻿';
-  table.querySelectorAll('tr').forEach(row => {
-    const cells = Array.from(row.querySelectorAll('th, td')).map(c => '"' + c.textContent.replace(/"/g, '""').trim() + '"');
-    csv += cells.join(';') + '\n';
-  });
-
-  downloadFile(csv, 'Showroom_Traffic_Porovnanie.csv', 'text/csv;charset=utf-8');
+  tableToXlsx(table, 'Showroom_Traffic_Porovnanie.xlsx');
   showToast('Export stiahnutý', 'success');
-}
-
-function downloadFile(content, filename, type) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 
 // ── Toast ──
