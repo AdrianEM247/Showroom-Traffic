@@ -599,9 +599,9 @@ function getWeekDates(year, week) {
 function generateWeekOptions() {
   const now = getWeekNumber(new Date());
   const options = [];
-  // From current week to end of year (week 53 for 2026)
+  // From week 20 to end of year
   const lastWeek = getWeekNumber(new Date(now.year, 11, 28)).week;
-  for (let w = now.week; w <= lastWeek; w++) {
+  for (let w = 20; w <= lastWeek; w++) {
     const key = `${now.year}_CW${String(w).padStart(2,'0')}`;
     const label = `T${w} (${getWeekDates(now.year, w)})`;
     options.push({ key, label, week: w });
