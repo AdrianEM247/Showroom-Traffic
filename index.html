@@ -1080,11 +1080,16 @@ function tableToXlsx(table, filename, title) {
     });
   });
 
-  const colWidths = [];
-  for (let c = 0; c < cols; c++) { colWidths.push({ wch: Math.max(...data.map(r => String(r[c] || '').length) + 3, 8) }); }
-  colWidths[0] = { wch: 35 };
+  const colWidths = data[0].map((header, i) => {
+    if (i === 0) return { wch: 35 };
+    const hLen = String(header || '').length;
+    let maxData = 0;
+    data.forEach(r => { const l = String(r[i] || '').length; if (l > maxData) maxData = l; });
+    return { wch: Math.max(hLen + 2, maxData + 2, 10) };
+  });
   ws['!cols'] = colWidths;
-  ws['!rows'] = [{ hpt: 30 }, { hpt: 10 }];
+
+  ws['!rows'] = [{ hpt: 32 }, { hpt: 8 }];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Data');
   XLSX.writeFile(wb, filename);
