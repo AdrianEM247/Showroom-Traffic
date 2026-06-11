@@ -406,7 +406,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- ── LOGIN ── -->
 <div id="loginScreen" class="login-container">
   <div class="login-card">
-    <div style="background:#000;margin:-48px -40px 24px -40px;padding:24px 32px;border-radius:16px 16px 0 0;text-align:center"><img src="logo.png" style="max-width:280px;width:100%;" alt="OMODA | JAECOO"><div style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.15);padding-top:10px"><img src="gae_logo.png" style="max-width:80px;opacity:0.85" alt="Grand Automotive"></div></div>
     <h1>🚗 Showroom Traffic</h1>
     <p>OMODA & JAECOO — Týždenný reporting návštevnosti</p>
     <select id="loginDealer">
@@ -484,10 +483,27 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
   <!-- Overview Tab -->
   <div id="tabOverview">
-    <div class="export-bar">
+    <!-- Mode toggle -->
+    <div style="display:flex;gap:4px;margin-bottom:12px;background:var(--card);padding:4px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:280px">
+      <button class="admin-tab active" id="modeWeekBtn" onclick="setOverviewMode('week')" style="flex:1;padding:8px 12px;font-size:12px">Jeden týždeň</button>
+      <button class="admin-tab" id="modeRangeBtn" onclick="setOverviewMode('range')" style="flex:1;padding:8px 12px;font-size:12px">Rozsah (od–do)</button>
+    </div>
+
+    <!-- Single week bar -->
+    <div class="export-bar" id="weekBar">
       <label style="font-weight:600;font-size:14px">Týždeň:</label>
-      <select id="adminWeekSelect" onChange="loadAdminData()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+      <select id="adminWeekSelect" onchange="loadAdminData()" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
       <button class="btn btn-secondary" onclick="exportExcel()" style="margin-left:auto">📥 Export Excel</button>
+    </div>
+
+    <!-- Range bar -->
+    <div class="export-bar hidden" id="rangeBar">
+      <label style="font-weight:600;font-size:14px">Od:</label>
+      <select id="rangeWeekFrom" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+      <label style="font-weight:600;font-size:14px">Do:</label>
+      <select id="rangeWeekTo" style="padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit"></select>
+      <button class="btn btn-save" onclick="loadAdminDataRange()" style="padding:8px 18px">Zobraziť</button>
+      <button class="btn btn-secondary" onclick="exportExcelRange()" style="margin-left:auto">📥 Export Excel</button>
     </div>
 
     <div class="stats-row" id="statsRow"></div>
@@ -545,13 +561,13 @@ const MODELS = [
   { id: 'omoda5', name: 'Omoda 5', brand: 'omoda' },
   { id: 'omoda5_shsh', name: 'Omoda 5 SHS-H', brand: 'omoda' },
   { id: 'omoda5_ev', name: 'Omoda 5 EV', brand: 'omoda' },
-  { id: 'omoda9_shsp', name: 'Omoda 9 SHS-P', brand: 'omoda' },
+  { id: 'omoda9_shs', name: 'Omoda 9 SHS', brand: 'omoda' },
   { id: 'jaecoo5', name: 'Jaecoo 5', brand: 'jaecoo' },
-  { id: 'jaecoo5_shsh', name: 'Jaecoo 5 SHS-H', brand: 'jaecoo' },
+  { id: 'jaecoo5_hev', name: 'Jaecoo 5 HEV', brand: 'jaecoo' },
   { id: 'jaecoo5_ev', name: 'Jaecoo 5 EV', brand: 'jaecoo' },
   { id: 'jaecoo7', name: 'Jaecoo 7', brand: 'jaecoo' },
-  { id: 'jaecoo7_shsp', name: 'Jaecoo 7 SHS-P', brand: 'jaecoo' },
   { id: 'jaecoo7_shsh', name: 'Jaecoo 7 SHS-H', brand: 'jaecoo' },
+  { id: 'jaecoo7_shsp', name: 'Jaecoo 7 SHS-P', brand: 'jaecoo' },
   { id: 'jaecoo8_shsp', name: 'Jaecoo 8 SHS-P', brand: 'jaecoo' },
 ];
 
@@ -616,13 +632,16 @@ function generateWeekOptions() {
 function populateWeekSelects() {
   const opts = generateWeekOptions();
   const html = opts.map(o => `<option value="${o.key}">${o.label}</option>`).join('');
-  ['weekSelect', 'adminWeekSelect', 'compareWeek1', 'compareWeek2', 'modelsWeekSelect'].forEach(id => {
+  ['weekSelect', 'adminWeekSelect', 'compareWeek1', 'compareWeek2', 'modelsWeekSelect', 'rangeWeekFrom', 'rangeWeekTo'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
   // Set compare week2 to second option
   const cw2 = document.getElementById('compareWeek2');
   if (cw2 && cw2.options.length > 1) cw2.selectedIndex = 1;
+  // Set rangeWeekTo to 4th option (approx 1 month range)
+  const rTo = document.getElementById('rangeWeekTo');
+  if (rTo && rTo.options.length > 3) rTo.selectedIndex = 3;
 }
 
 // ── Login ──
@@ -1036,34 +1055,64 @@ function tableToXlsx(table, filename, title) {
   });
 
   const wb = XLSX.utils.book_new();
+
+  // Title row + empty row + data
   const sheetData = [[title || filename.replace('.xlsx','')], [], ...data];
   const ws = XLSX.utils.aoa_to_sheet(sheetData);
-  const cols = data[0] ? data[0].length : 1;
 
+  const cols = data[0] ? data[0].length : 1;
   const headerStyle = {
     font: { bold: true, color: { rgb: 'FFFFFF' }, name: 'Arial', sz: 11 },
     fill: { fgColor: { rgb: '1A1A2E' } },
     alignment: { horizontal: 'center', vertical: 'center' },
-    border: { top: { style: 'thin', color: { rgb: 'FFFFFF' } }, bottom: { style: 'thin', color: { rgb: 'FFFFFF' } }, left: { style: 'thin', color: { rgb: 'FFFFFF' } }, right: { style: 'thin', color: { rgb: 'FFFFFF' } } }
+    border: {
+      top: { style: 'thin', color: { rgb: 'FFFFFF' } },
+      bottom: { style: 'thin', color: { rgb: 'FFFFFF' } },
+      left: { style: 'thin', color: { rgb: 'FFFFFF' } },
+      right: { style: 'thin', color: { rgb: 'FFFFFF' } }
+    }
   };
   const titleStyle = {
     font: { bold: true, color: { rgb: 'FFFFFF' }, name: 'Arial', sz: 14 },
     fill: { fgColor: { rgb: 'C8102E' } },
     alignment: { horizontal: 'center', vertical: 'center' }
   };
-  const evenRow = { font: { name: 'Arial', sz: 10 }, fill: { fgColor: { rgb: 'F5F5F7' } }, border: { bottom: { style: 'thin', color: { rgb: 'E5E7EB' } } } };
-  const oddRow = { font: { name: 'Arial', sz: 10 }, fill: { fgColor: { rgb: 'FFFFFF' } }, border: { bottom: { style: 'thin', color: { rgb: 'E5E7EB' } } } };
-  const totalStyle = { font: { bold: true, color: { rgb: 'FFFFFF' }, name: 'Arial', sz: 11 }, fill: { fgColor: { rgb: '1A1A2E' } }, alignment: { horizontal: 'center' }, border: { top: { style: 'medium', color: { rgb: '1A1A2E' } } } };
+  const evenRow = {
+    font: { name: 'Arial', sz: 10 },
+    fill: { fgColor: { rgb: 'F5F5F7' } },
+    border: {
+      bottom: { style: 'thin', color: { rgb: 'E5E7EB' } }
+    }
+  };
+  const oddRow = {
+    font: { name: 'Arial', sz: 10 },
+    fill: { fgColor: { rgb: 'FFFFFF' } },
+    border: {
+      bottom: { style: 'thin', color: { rgb: 'E5E7EB' } }
+    }
+  };
+  const totalStyle = {
+    font: { bold: true, color: { rgb: 'FFFFFF' }, name: 'Arial', sz: 11 },
+    fill: { fgColor: { rgb: '1A1A2E' } },
+    alignment: { horizontal: 'center' },
+    border: {
+      top: { style: 'medium', color: { rgb: '1A1A2E' } }
+    }
+  };
   const statusOk = { font: { name: 'Arial', sz: 10, color: { rgb: '065F46' } }, fill: { fgColor: { rgb: 'D1FAE5' } }, alignment: { horizontal: 'center' } };
   const statusBad = { font: { name: 'Arial', sz: 10, color: { rgb: '92400E' } }, fill: { fgColor: { rgb: 'FEF3C7' } }, alignment: { horizontal: 'center' } };
+  const centerNum = { alignment: { horizontal: 'center' } };
 
+  // Style title row (row 0 in sheet)
   for (let c = 0; c < cols; c++) {
     const addr = XLSX.utils.encode_cell({ r: 0, c });
     if (!ws[addr]) ws[addr] = { v: '', t: 's' };
     ws[addr].s = titleStyle;
   }
+  // Merge title row
   ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: cols - 1 } }];
 
+  // Style data rows (offset by 2 for title + empty row)
   data.forEach((row, ri) => {
     const excelRow = ri + 2;
     const isLastRow = ri === data.length - 1;
@@ -1071,18 +1120,28 @@ function tableToXlsx(table, filename, title) {
     row.forEach((val, ci) => {
       const addr = XLSX.utils.encode_cell({ r: excelRow, c: ci });
       if (!ws[addr]) ws[addr] = { v: val || '', t: typeof val === 'number' ? 'n' : 's' };
-      if (isHead) { ws[addr].s = headerStyle; }
-      else if (isLastRow && String(row[0]).includes('SPOLU')) { ws[addr].s = ci > 0 ? { ...totalStyle, alignment: { horizontal: 'center' } } : totalStyle; }
-      else {
+      if (isHead) {
+        ws[addr].s = headerStyle;
+      } else if (isLastRow && String(row[0]).includes('SPOLU')) {
+        ws[addr].s = totalStyle;
+        if (ci > 0) ws[addr].s = { ...totalStyle, alignment: { horizontal: 'center' } };
+      } else {
         const base = ri % 2 === 0 ? { ...oddRow } : { ...evenRow };
-        if (String(val) === '\u2713') ws[addr].s = statusOk;
-        else if (String(val) === '\u2717') ws[addr].s = statusBad;
-        else if (ci > 0) ws[addr].s = { ...base, alignment: { horizontal: 'center' } };
-        else ws[addr].s = { ...base, font: { ...base.font, bold: true } };
+        // Status column styling
+        if (String(val) === '✓') {
+          ws[addr].s = statusOk;
+        } else if (String(val) === '✗') {
+          ws[addr].s = statusBad;
+        } else if (ci > 0) {
+          ws[addr].s = { ...base, alignment: { horizontal: 'center' } };
+        } else {
+          ws[addr].s = { ...base, font: { ...base.font, bold: true } };
+        }
       }
     });
   });
 
+  // Column widths — explicit per column
   const colWidths = data[0].map((header, i) => {
     if (i === 0) return { wch: 35 };
     const hLen = String(header || '').length;
@@ -1092,6 +1151,7 @@ function tableToXlsx(table, filename, title) {
   });
   ws['!cols'] = colWidths;
 
+  // Row heights
   ws['!rows'] = [{ hpt: 32 }, { hpt: 8 }];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Data');
@@ -1103,8 +1163,8 @@ function exportExcel() {
   if (!table) return;
   const weekLabel = document.getElementById('adminWeekSelect').selectedOptions[0].text.split('(')[0].trim();
   const weekFull = document.getElementById('adminWeekSelect').selectedOptions[0].text;
-  tableToXlsx(table, `Showroom_Traffic_${weekLabel}.xlsx`, `O&J Showroom Traffic \u2014 ${weekFull}`);
-  showToast('Export stiahnut\xFD', 'success');
+  tableToXlsx(table, `Showroom_Traffic_${weekLabel}.xlsx`, `O&J Showroom Traffic — ${weekFull}`);
+  showToast('Export stiahnutý', 'success');
 }
 
 function exportCompareExcel() {
@@ -1112,8 +1172,150 @@ function exportCompareExcel() {
   if (!table) return;
   const w1 = document.getElementById('compareWeek1').selectedOptions[0].text.split('(')[0].trim();
   const w2 = document.getElementById('compareWeek2').selectedOptions[0].text.split('(')[0].trim();
-  tableToXlsx(table, 'Showroom_Traffic_Porovnanie.xlsx', `O&J Showroom Traffic \u2014 Porovnanie ${w1} vs ${w2}`);
-  showToast('Export stiahnut\xFD', 'success');
+  tableToXlsx(table, 'Showroom_Traffic_Porovnanie.xlsx', `O&J Showroom Traffic — Porovnanie ${w1} vs ${w2}`);
+  showToast('Export stiahnutý', 'success');
+}
+
+// ── Overview Mode Toggle ──
+let overviewMode = 'week';
+let lastRangeData = null;
+let lastRangeLabel = '';
+
+function setOverviewMode(mode) {
+  overviewMode = mode;
+  document.getElementById('modeWeekBtn').classList.toggle('active', mode === 'week');
+  document.getElementById('modeRangeBtn').classList.toggle('active', mode === 'range');
+  document.getElementById('weekBar').classList.toggle('hidden', mode !== 'week');
+  document.getElementById('rangeBar').classList.toggle('hidden', mode !== 'range');
+
+  if (mode === 'week') {
+    loadAdminData();
+  } else {
+    // Clear current view so user clicks "Zobraziť"
+    document.getElementById('statsRow').innerHTML = '';
+    document.getElementById('trackingSection').innerHTML = '';
+    document.getElementById('dealerTable').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:32px">Vyber rozsah týždňov a klikni <strong>Zobraziť</strong></p>';
+  }
+}
+
+// ── Range aggregation ──
+async function loadAdminDataRange() {
+  const fromKey = document.getElementById('rangeWeekFrom').value;
+  const toKey = document.getElementById('rangeWeekTo').value;
+
+  const opts = generateWeekOptions();
+  const fromIdx = opts.findIndex(o => o.key === fromKey);
+  const toIdx = opts.findIndex(o => o.key === toKey);
+
+  if (fromIdx < 0 || toIdx < 0 || fromIdx > toIdx) {
+    showToast('Neplatný rozsah — "Od" musí byť pred "Do"', 'error');
+    return;
+  }
+
+  const weekKeys = opts.slice(fromIdx, toIdx + 1).map(o => o.key);
+  const fromLabel = opts[fromIdx].label;
+  const toLabel = opts[toIdx].label;
+  lastRangeLabel = `${fromLabel.split('(')[0].trim()} – ${toLabel.split('(')[0].trim()} (${weekKeys.length} týžd.)`;
+
+  try {
+    // Fetch all weeks in parallel
+    const snaps = await Promise.all(weekKeys.map(k => db.ref(`showroom_traffic/${k}`).once('value')));
+
+    // Aggregate per dealer
+    const agg = {};
+    const weeksWithData = new Set();
+
+    snaps.forEach((snap, i) => {
+      const weekData = snap.val() || {};
+      if (Object.keys(weekData).length > 0) weeksWithData.add(weekKeys[i]);
+
+      Object.entries(weekData).forEach(([code, d]) => {
+        if (!agg[code]) {
+          agg[code] = { totalNav: 0, totalTJ: 0, totalObj: 0, age: { '18_30': 0, '31_45': 0, '46_60': 0, '60_plus': 0 }, weekCount: 0 };
+        }
+        agg[code].totalNav += d.totalNav || 0;
+        agg[code].totalTJ += d.totalTJ || 0;
+        agg[code].totalObj += d.totalObj || 0;
+        if (d.age) {
+          agg[code].age['18_30'] += d.age['18_30'] || 0;
+          agg[code].age['31_45'] += d.age['31_45'] || 0;
+          agg[code].age['46_60'] += d.age['46_60'] || 0;
+          agg[code].age['60_plus'] += d.age['60_plus'] || 0;
+        }
+        agg[code].weekCount++;
+      });
+    });
+
+    lastRangeData = agg;
+
+    // Stats
+    const reported = Object.keys(agg).length;
+    let totalNav = 0, totalTJ = 0, totalObj = 0;
+    Object.values(agg).forEach(d => {
+      totalNav += d.totalNav;
+      totalTJ += d.totalTJ;
+      totalObj += d.totalObj;
+    });
+    const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">${lastRangeLabel}</div></div>
+      <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
+      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
+      <div class="stat-card"><div class="stat-label">Týždne s dátami</div><div class="stat-value">${weeksWithData.size} / ${weekKeys.length}</div><div class="stat-sub">Dílerov reportovalo: ${reported}</div></div>
+    `;
+
+    document.getElementById('trackingSection').innerHTML = '';
+
+    // Dealer table
+    let rows = '';
+    DEALERS.forEach(dealer => {
+      const d = agg[dealer.code];
+      if (d) {
+        rows += `<tr>
+          <td>${dealer.name}</td>
+          <td><strong>${d.totalNav}</strong></td>
+          <td>${d.totalTJ}</td>
+          <td>${d.totalObj}</td>
+          <td>${d.totalNav > 0 ? Math.round(d.totalTJ/d.totalNav*100) : 0}%</td>
+          <td>${d.age['18_30']}</td><td>${d.age['31_45']}</td><td>${d.age['46_60']}</td><td>${d.age['60_plus']}</td>
+          <td>${d.weekCount}/${weekKeys.length}</td>
+        </tr>`;
+      } else {
+        rows += `<tr style="opacity:0.5">
+          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>0/${weekKeys.length}</td>
+        </tr>`;
+      }
+    });
+
+    rows += `<tr class="total-row">
+      <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObj}</td>
+      <td>${convTJ}%</td>
+      <td>${Object.values(agg).reduce((s,d)=>s+d.age['18_30'],0)}</td>
+      <td>${Object.values(agg).reduce((s,d)=>s+d.age['31_45'],0)}</td>
+      <td>${Object.values(agg).reduce((s,d)=>s+d.age['46_60'],0)}</td>
+      <td>${Object.values(agg).reduce((s,d)=>s+d.age['60_plus'],0)}</td>
+      <td>${reported} díl.</td>
+    </tr>`;
+
+    document.getElementById('dealerTable').innerHTML = `
+      <table class="data-table">
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
+        ${rows}
+      </table>`;
+
+  } catch (err) {
+    console.error(err);
+    showToast('Chyba pri načítaní dát za rozsah', 'error');
+  }
+}
+
+function exportExcelRange() {
+  const table = document.querySelector('#dealerTable table');
+  if (!table) { showToast('Najprv klikni Zobraziť', 'error'); return; }
+  const filename = `Showroom_Traffic_${lastRangeLabel.replace(/[^a-zA-Z0-9_–]/g, '_')}.xlsx`;
+  tableToXlsx(table, filename, `O&J Showroom Traffic — ${lastRangeLabel}`);
+  showToast('Export stiahnutý', 'success');
 }
 
 // ── Toast ──
