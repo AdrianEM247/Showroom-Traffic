@@ -652,7 +652,7 @@ function populateWeekSelects() {
 function initLogin() {
   const select = document.getElementById('loginDealer');
   const adminOpt = '<option value="ADMIN">── ADMIN ──</option>';
-  const dealerOpts = DEALERS.map(d => `<option value="${d.code}">${d.name}</option>`).join('');
+  const dealerOpts = [...DEALERS].sort((a, b) => a.name.localeCompare(b.name, 'sk')).map(d => `<option value="${d.code}">${d.name}</option>`).join('');
   select.innerHTML = '<option value="">— Vyberte dílerstvo —</option>' + dealerOpts + '<optgroup label="─────────">' + adminOpt + '</optgroup>';
 
   select.onchange = () => {
