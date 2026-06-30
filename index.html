@@ -862,10 +862,14 @@ async function loadAdminData() {
 
     const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
 
+    const srNav = totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : '0.0';
+    const srTJ = totalTJ > 0 ? (totalObj/totalTJ*100).toFixed(1) : '0.0';
+
     document.getElementById('statsRow').innerHTML = `
       <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">Ø ${(totalNav / Math.max(reported,1)).toFixed(1)} / díler</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
-      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
+      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${srNav}% z návštev</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--success)"><div class="stat-label">Success Ratio</div><div class="stat-value">${srNav}%</div><div class="stat-sub">Obj/TJ: ${srTJ}%</div></div>
       <div class="stat-card"><div class="stat-label">Reportovalo</div><div class="stat-value">${reported} / ${DEALERS.length}</div><div class="stat-sub ${reported < DEALERS.length ? 'stat-red' : 'stat-green'}">${reported < DEALERS.length ? 'Chýba ' + (DEALERS.length - reported) + ' díler' + (DEALERS.length - reported > 1 && DEALERS.length - reported < 5 ? 'i' : 'ov') : 'Kompletné ✓'}</div></div>
     `;
 
@@ -886,18 +890,20 @@ async function loadAdminData() {
     DEALERS.forEach(dealer => {
       const d = data[dealer.code];
       if (d) {
+        const dSR = d.totalNav > 0 ? (((d.totalObj||0)/(d.totalNav))*100).toFixed(1) : '0.0';
         rows += `<tr>
           <td>${dealer.name}</td>
           <td><strong>${d.totalNav || 0}</strong></td>
           <td>${d.totalTJ || 0}</td>
           <td>${d.totalObj || 0}</td>
           <td>${d.totalNav > 0 ? Math.round((d.totalTJ||0)/(d.totalNav)*100) : 0}%</td>
+          <td style="font-weight:600;color:var(--success)">${dSR}%</td>
           <td>${(d.age?.['18_30']||0)}</td><td>${(d.age?.['31_45']||0)}</td><td>${(d.age?.['46_60']||0)}</td><td>${(d.age?.['60_plus']||0)}</td>
           <td><span class="status-badge status-done">✓</span></td>
         </tr>`;
       } else {
         rows += `<tr style="opacity:0.5">
-          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
+          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
           <td><span class="status-badge status-missing">✗</span></td>
         </tr>`;
       }
@@ -906,6 +912,7 @@ async function loadAdminData() {
     rows += `<tr class="total-row">
       <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObj}</td>
       <td>${convTJ}%</td>
+      <td style="font-weight:600">${srNav}%</td>
       <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['18_30']||0),0)}</td>
       <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['31_45']||0),0)}</td>
       <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['46_60']||0),0)}</td>
@@ -915,7 +922,7 @@ async function loadAdminData() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>SR%</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
         ${rows}
       </table>`;
 
@@ -949,6 +956,8 @@ async function loadComparison() {
       const an = a?.totalNav||0, at = a?.totalTJ||0, ao = a?.totalObj||0;
       const bn = b?.totalNav||0, bt = b?.totalTJ||0, bo = b?.totalObj||0;
       const dn = bn-an, dt = bt-at, dobj = bo-ao;
+      const sr1 = an > 0 ? ((ao/an)*100).toFixed(1) : '–';
+      const sr2 = bn > 0 ? ((bo/bn)*100).toFixed(1) : '–';
 
       t1n+=an;t1t+=at;t1o+=ao;t2n+=bn;t2t+=bt;t2o+=bo;
 
@@ -956,24 +965,26 @@ async function loadComparison() {
 
       rows += `<tr>
         <td>${dealer.name}</td>
-        <td>${an||'–'}</td><td>${at||'–'}</td><td>${ao||'–'}</td>
-        <td>${bn||'–'}</td><td>${bt||'–'}</td><td>${bo||'–'}</td>
+        <td>${an||'–'}</td><td>${at||'–'}</td><td>${ao||'–'}</td><td>${sr1 === '–' ? '–' : sr1+'%'}</td>
+        <td>${bn||'–'}</td><td>${bt||'–'}</td><td>${bo||'–'}</td><td>${sr2 === '–' ? '–' : sr2+'%'}</td>
         <td>${fmt(dn)}</td><td>${fmt(dt)}</td><td>${fmt(dobj)}</td>
       </tr>`;
     });
 
     const fmtT = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
+    const cSR1 = t1n > 0 ? ((t1o/t1n)*100).toFixed(1)+'%' : '–';
+    const cSR2 = t2n > 0 ? ((t2o/t2n)*100).toFixed(1)+'%' : '–';
     rows += `<tr class="total-row">
       <td>SPOLU</td>
-      <td>${t1n}</td><td>${t1t}</td><td>${t1o}</td>
-      <td>${t2n}</td><td>${t2t}</td><td>${t2o}</td>
+      <td>${t1n}</td><td>${t1t}</td><td>${t1o}</td><td>${cSR1}</td>
+      <td>${t2n}</td><td>${t2t}</td><td>${t2o}</td><td>${cSR2}</td>
       <td>${fmtT(t2n-t1n)}</td><td>${fmtT(t2t-t1t)}</td><td>${fmtT(t2o-t1o)}</td>
     </tr>`;
 
     document.getElementById('compareTable').innerHTML = `
       <table class="data-table">
-        <tr><th rowspan="2">Díler</th><th colspan="3">${w1Label.split('(')[0].trim()}</th><th colspan="3">${w2Label.split('(')[0].trim()}</th><th colspan="3">Δ Zmena</th></tr>
-        <tr><th>Nav</th><th>TJ</th><th>Obj</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Nav</th><th>TJ</th><th>Obj</th></tr>
+        <tr><th rowspan="2">Díler</th><th colspan="4">${w1Label.split('(')[0].trim()}</th><th colspan="4">${w2Label.split('(')[0].trim()}</th><th colspan="3">Δ Zmena</th></tr>
+        <tr><th>Nav</th><th>TJ</th><th>Obj</th><th>SR%</th><th>Nav</th><th>TJ</th><th>Obj</th><th>SR%</th><th>Nav</th><th>TJ</th><th>Obj</th></tr>
         ${rows}
       </table>`;
 
@@ -1011,15 +1022,19 @@ async function loadModelsTab() {
     MODELS.forEach(m => {
       const v = modelTotals[m.id];
       const conv = v.nav > 0 ? Math.round(v.tj/v.nav*100) : 0;
+      const mSR = v.nav > 0 ? ((v.obj/v.nav)*100).toFixed(1) : '0.0';
+      const mSRtj = v.tj > 0 ? ((v.obj/v.tj)*100).toFixed(1) : '0.0';
       const brand = m.brand === 'omoda' ? '<span class="brand-tag brand-omoda">O</span>' : '<span class="brand-tag brand-jaecoo">J</span>';
-      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.obj}</td><td>${conv}%</td></tr>`;
+      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.obj}</td><td>${conv}%</td><td style="font-weight:600;color:var(--success)">${mSR}%</td><td>${mSRtj}%</td></tr>`;
       tn += v.nav; tt += v.tj; to2 += v.obj;
     });
-    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${to2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td></tr>`;
+    const tSR = tn > 0 ? ((to2/tn)*100).toFixed(1) : '0.0';
+    const tSRtj = tt > 0 ? ((to2/tt)*100).toFixed(1) : '0.0';
+    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${to2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td><td style="font-weight:600">${tSR}%</td><td>${tSRtj}%</td></tr>`;
 
     document.getElementById('modelsTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Objednávky</th><th>Konverzia TJ</th></tr>
+        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Objednávky</th><th>TJ/Nav</th><th>Obj/Nav</th><th>Obj/TJ</th></tr>
         ${rows}
       </table>`;
 
@@ -1262,10 +1277,14 @@ async function loadAdminDataRange() {
     });
     const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
 
+    const rSrNav = totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : '0.0';
+    const rSrTJ = totalTJ > 0 ? (totalObj/totalTJ*100).toFixed(1) : '0.0';
+
     document.getElementById('statsRow').innerHTML = `
       <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">${lastRangeLabel}</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
-      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
+      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${rSrNav}% z návštev</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--success)"><div class="stat-label">Success Ratio</div><div class="stat-value">${rSrNav}%</div><div class="stat-sub">Obj/TJ: ${rSrTJ}%</div></div>
       <div class="stat-card"><div class="stat-label">Týždne s dátami</div><div class="stat-value">${weeksWithData.size} / ${weekKeys.length}</div><div class="stat-sub">Dílerov reportovalo: ${reported}</div></div>
     `;
 
@@ -1276,18 +1295,20 @@ async function loadAdminDataRange() {
     DEALERS.forEach(dealer => {
       const d = agg[dealer.code];
       if (d) {
+        const dSR2 = d.totalNav > 0 ? ((d.totalObj/d.totalNav)*100).toFixed(1) : '0.0';
         rows += `<tr>
           <td>${dealer.name}</td>
           <td><strong>${d.totalNav}</strong></td>
           <td>${d.totalTJ}</td>
           <td>${d.totalObj}</td>
           <td>${d.totalNav > 0 ? Math.round(d.totalTJ/d.totalNav*100) : 0}%</td>
+          <td style="font-weight:600;color:var(--success)">${dSR2}%</td>
           <td>${d.age['18_30']}</td><td>${d.age['31_45']}</td><td>${d.age['46_60']}</td><td>${d.age['60_plus']}</td>
           <td>${d.weekCount}/${weekKeys.length}</td>
         </tr>`;
       } else {
         rows += `<tr style="opacity:0.5">
-          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>0/${weekKeys.length}</td>
+          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>0/${weekKeys.length}</td>
         </tr>`;
       }
     });
@@ -1295,6 +1316,7 @@ async function loadAdminDataRange() {
     rows += `<tr class="total-row">
       <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObj}</td>
       <td>${convTJ}%</td>
+      <td style="font-weight:600">${rSrNav}%</td>
       <td>${Object.values(agg).reduce((s,d)=>s+d.age['18_30'],0)}</td>
       <td>${Object.values(agg).reduce((s,d)=>s+d.age['31_45'],0)}</td>
       <td>${Object.values(agg).reduce((s,d)=>s+d.age['46_60'],0)}</td>
@@ -1304,7 +1326,7 @@ async function loadAdminDataRange() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>SR%</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
         ${rows}
       </table>`;
 
