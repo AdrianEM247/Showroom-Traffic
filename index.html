@@ -869,7 +869,7 @@ async function loadAdminData() {
       <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">Ø ${(totalNav / Math.max(reported,1)).toFixed(1)} / díler</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
       <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${srNav}% z návštev</div></div>
-      <div class="stat-card" style="border-top:3px solid var(--success)"><div class="stat-label">Success Ratio</div><div class="stat-value">${srNav}%</div><div class="stat-sub">Obj/TJ: ${srTJ}%</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--success)"><div class="stat-label">Conv/Nav</div><div class="stat-value">${srNav}%</div><div class="stat-sub">Conv/TJ: ${srTJ}%</div></div>
       <div class="stat-card"><div class="stat-label">Reportovalo</div><div class="stat-value">${reported} / ${DEALERS.length}</div><div class="stat-sub ${reported < DEALERS.length ? 'stat-red' : 'stat-green'}">${reported < DEALERS.length ? 'Chýba ' + (DEALERS.length - reported) + ' díler' + (DEALERS.length - reported > 1 && DEALERS.length - reported < 5 ? 'i' : 'ov') : 'Kompletné ✓'}</div></div>
     `;
 
@@ -922,7 +922,7 @@ async function loadAdminData() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>SR%</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>Conv/Nav</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
         ${rows}
       </table>`;
 
@@ -984,7 +984,7 @@ async function loadComparison() {
     document.getElementById('compareTable').innerHTML = `
       <table class="data-table">
         <tr><th rowspan="2">Díler</th><th colspan="4">${w1Label.split('(')[0].trim()}</th><th colspan="4">${w2Label.split('(')[0].trim()}</th><th colspan="3">Δ Zmena</th></tr>
-        <tr><th>Nav</th><th>TJ</th><th>Obj</th><th>SR%</th><th>Nav</th><th>TJ</th><th>Obj</th><th>SR%</th><th>Nav</th><th>TJ</th><th>Obj</th></tr>
+        <tr><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv/Nav</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv/Nav</th><th>Nav</th><th>TJ</th><th>Obj</th></tr>
         ${rows}
       </table>`;
 
@@ -1284,7 +1284,7 @@ async function loadAdminDataRange() {
       <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">${lastRangeLabel}</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
       <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${rSrNav}% z návštev</div></div>
-      <div class="stat-card" style="border-top:3px solid var(--success)"><div class="stat-label">Success Ratio</div><div class="stat-value">${rSrNav}%</div><div class="stat-sub">Obj/TJ: ${rSrTJ}%</div></div>
+      <div class="stat-card" style="border-top:3px solid var(--success)"><div class="stat-label">Conv/Nav</div><div class="stat-value">${rSrNav}%</div><div class="stat-sub">Conv/TJ: ${rSrTJ}%</div></div>
       <div class="stat-card"><div class="stat-label">Týždne s dátami</div><div class="stat-value">${weeksWithData.size} / ${weekKeys.length}</div><div class="stat-sub">Dílerov reportovalo: ${reported}</div></div>
     `;
 
@@ -1326,7 +1326,7 @@ async function loadAdminDataRange() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>SR%</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>Conv/Nav</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
         ${rows}
       </table>`;
 
