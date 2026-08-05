@@ -161,8 +161,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 .model-grid {
   display: grid;
-  grid-template-columns: 180px repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: 180px repeat(4, 1fr);
+  gap: 6px;
   align-items: center;
 }
 .model-grid .header-cell {
@@ -253,7 +253,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 .form-totals {
   display: grid;
-  grid-template-columns: 180px repeat(3, 1fr);
+  grid-template-columns: 180px repeat(4, 1fr);
   gap: 8px;
   margin-top: 8px;
   padding-top: 12px;
@@ -390,7 +390,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .hidden { display: none !important; }
 
 @media (max-width: 768px) {
-  .model-grid { grid-template-columns: 140px repeat(3, 1fr); gap: 4px; }
+  .model-grid { grid-template-columns: 130px repeat(4, 1fr); gap: 3px; }
   .model-grid input[type="number"] { padding: 8px 4px; font-size: 13px; }
   .age-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -441,14 +441,16 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="header-cell"></div>
       <div class="header-cell">Návštevy</div>
       <div class="header-cell">Test. jazdy</div>
-      <div class="header-cell">Objednávky</div>
+      <div class="header-cell">Obj. Retail</div>
+      <div class="header-cell">Obj. Fleet</div>
     </div>
     <div id="modelRows"></div>
     <div class="form-totals" id="formTotals">
       <div class="total-label">SPOLU</div>
       <div class="total-value" id="totalNav">0</div>
       <div class="total-value" id="totalTJ">0</div>
-      <div class="total-value" id="totalObj">0</div>
+      <div class="total-value" id="totalObjR">0</div>
+      <div class="total-value" id="totalObjF">0</div>
     </div>
   </div>
 
@@ -612,6 +614,9 @@ const DEALERS = [
   { code: 'OSK0151', name: 'MOTORBOX (Bojnice)' },
   { code: 'OSK0160', name: 'AUTO SWAM (Košice)' },
   { code: 'OSK0170', name: 'ALBEX PLUS (Nitra)' },
+  { code: 'OSK0180', name: 'Autoteam (Bratislava)' },
+  { code: 'OSK0190', name: 'Benrox Plus (Poprad)' },
+  { code: 'OSK0200', name: 'Petro Cars' },
 ];
 
 // ── State ──
@@ -746,22 +751,25 @@ function buildModelForm() {
         <div class="model-name">${m.name}</div>
         <input type="number" min="0" id="${m.id}_nav" value="0" oninput="updateTotals()">
         <input type="number" min="0" id="${m.id}_tj" value="0" oninput="updateTotals()">
-        <input type="number" min="0" id="${m.id}_obj" value="0" oninput="updateTotals()">
+        <input type="number" min="0" id="${m.id}_objr" value="0" oninput="updateTotals()">
+        <input type="number" min="0" id="${m.id}_objf" value="0" oninput="updateTotals()">
       </div>`;
   });
   container.innerHTML = html;
 }
 
 function updateTotals() {
-  let nav = 0, tj = 0, obj = 0;
+  let nav = 0, tj = 0, objR = 0, objF = 0;
   MODELS.forEach(m => {
     nav += parseInt(document.getElementById(`${m.id}_nav`).value) || 0;
     tj += parseInt(document.getElementById(`${m.id}_tj`).value) || 0;
-    obj += parseInt(document.getElementById(`${m.id}_obj`).value) || 0;
+    objR += parseInt(document.getElementById(`${m.id}_objr`).value) || 0;
+    objF += parseInt(document.getElementById(`${m.id}_objf`).value) || 0;
   });
   document.getElementById('totalNav').textContent = nav;
   document.getElementById('totalTJ').textContent = tj;
-  document.getElementById('totalObj').textContent = obj;
+  document.getElementById('totalObjR').textContent = objR;
+  document.getElementById('totalObjF').textContent = objF;
 }
 
 function getFormData() {
@@ -769,11 +777,15 @@ function getFormData() {
   MODELS.forEach(m => {
     const nav = parseInt(document.getElementById(`${m.id}_nav`).value) || 0;
     const tjs = parseInt(document.getElementById(`${m.id}_tj`).value) || 0;
-    const objs = parseInt(document.getElementById(`${m.id}_obj`).value) || 0;
-    if (nav || tjs || objs) {
-      models[m.id] = { nav, tj: tjs, obj: objs };
+    const objR = parseInt(document.getElementById(`${m.id}_objr`).value) || 0;
+    const objF = parseInt(document.getElementById(`${m.id}_objf`).value) || 0;
+    if (nav || tjs || objR || objF) {
+      models[m.id] = { nav, tj: tjs, objR, objF, obj: objR + objF };
     }
   });
+
+  const totalObjR = parseInt(document.getElementById('totalObjR').textContent) || 0;
+  const totalObjF = parseInt(document.getElementById('totalObjF').textContent) || 0;
 
   return {
     dealerCode: currentDealer.code,
@@ -789,7 +801,9 @@ function getFormData() {
     submittedAt: new Date().toISOString(),
     totalNav: parseInt(document.getElementById('totalNav').textContent) || 0,
     totalTJ: parseInt(document.getElementById('totalTJ').textContent) || 0,
-    totalObj: parseInt(document.getElementById('totalObj').textContent) || 0,
+    totalObjR,
+    totalObjF,
+    totalObj: totalObjR + totalObjF,
   };
 }
 
@@ -798,7 +812,9 @@ function setFormData(data) {
     const md = data.models && data.models[m.id];
     document.getElementById(`${m.id}_nav`).value = md ? md.nav || 0 : 0;
     document.getElementById(`${m.id}_tj`).value = md ? md.tj || 0 : 0;
-    document.getElementById(`${m.id}_obj`).value = md ? md.obj || 0 : 0;
+    // Backward compat: old data has "obj", new has "objR"+"objF"
+    document.getElementById(`${m.id}_objr`).value = md ? (md.objR ?? md.obj ?? 0) : 0;
+    document.getElementById(`${m.id}_objf`).value = md ? (md.objF ?? 0) : 0;
   });
   document.getElementById('age1830').value = data.age ? data.age['18_30'] || 0 : 0;
   document.getElementById('age3145').value = data.age ? data.age['31_45'] || 0 : 0;
@@ -812,7 +828,8 @@ function clearForm() {
   MODELS.forEach(m => {
     document.getElementById(`${m.id}_nav`).value = 0;
     document.getElementById(`${m.id}_tj`).value = 0;
-    document.getElementById(`${m.id}_obj`).value = 0;
+    document.getElementById(`${m.id}_objr`).value = 0;
+    document.getElementById(`${m.id}_objf`).value = 0;
   });
   document.getElementById('age1830').value = 0;
   document.getElementById('age3145').value = 0;
@@ -847,7 +864,7 @@ async function submitReport() {
   const weekKey = document.getElementById('weekSelect').value;
   const data = getFormData();
 
-  if (data.totalNav === 0 && data.totalTJ === 0 && data.totalObj === 0) {
+  if (data.totalNav === 0 && data.totalTJ === 0 && data.totalObjR === 0 && data.totalObjF === 0) {
     if (!confirm('Všetky hodnoty sú nulové. Naozaj chcete odoslať prázdny report?')) return;
   }
 
@@ -872,19 +889,21 @@ async function loadAdminData() {
 
     // Stats
     const reported = Object.keys(data).length;
-    let totalNav = 0, totalTJ = 0, totalObj = 0;
+    let totalNav = 0, totalTJ = 0, totalObjR = 0, totalObjF = 0;
     Object.values(data).forEach(d => {
       totalNav += d.totalNav || 0;
       totalTJ += d.totalTJ || 0;
-      totalObj += d.totalObj || 0;
+      totalObjR += d.totalObjR ?? d.totalObj ?? 0;
+      totalObjF += d.totalObjF ?? 0;
     });
+    const totalObj = totalObjR + totalObjF;
 
     const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
 
     document.getElementById('statsRow').innerHTML = `
       <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">Ø ${(totalNav / Math.max(reported,1)).toFixed(1)} / díler</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
-      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
+      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">Retail: ${totalObjR} | Fleet: ${totalObjF}</div></div>
       <div class="stat-card"><div class="stat-label">Reportovalo</div><div class="stat-value">${reported} / ${DEALERS.length}</div><div class="stat-sub ${reported < DEALERS.length ? 'stat-red' : 'stat-green'}">${reported < DEALERS.length ? 'Chýba ' + (DEALERS.length - reported) + ' díler' + (DEALERS.length - reported > 1 && DEALERS.length - reported < 5 ? 'i' : 'ov') : 'Kompletné ✓'}</div></div>
     `;
 
@@ -905,25 +924,29 @@ async function loadAdminData() {
     DEALERS.forEach(dealer => {
       const d = data[dealer.code];
       if (d) {
+        const dObjR = d.totalObjR ?? d.totalObj ?? 0;
+        const dObjF = d.totalObjF ?? 0;
         rows += `<tr>
           <td>${dealer.name}</td>
           <td><strong>${d.totalNav || 0}</strong></td>
           <td>${d.totalTJ || 0}</td>
-          <td>${d.totalObj || 0}</td>
+          <td>${dObjR}</td>
+          <td>${dObjF}</td>
+          <td>${dObjR + dObjF}</td>
           <td>${d.totalNav > 0 ? Math.round((d.totalTJ||0)/(d.totalNav)*100) : 0}%</td>
           <td>${(d.age?.['18_30']||0)}</td><td>${(d.age?.['31_45']||0)}</td><td>${(d.age?.['46_60']||0)}</td><td>${(d.age?.['60_plus']||0)}</td>
           <td><span class="status-badge status-done">✓</span></td>
         </tr>`;
       } else {
         rows += `<tr style="opacity:0.5">
-          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
+          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td>
           <td><span class="status-badge status-missing">✗</span></td>
         </tr>`;
       }
     });
 
     rows += `<tr class="total-row">
-      <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObj}</td>
+      <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObjR}</td><td>${totalObjF}</td><td>${totalObj}</td>
       <td>${convTJ}%</td>
       <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['18_30']||0),0)}</td>
       <td>${Object.values(data).reduce((s,d)=>s+(d.age?.['31_45']||0),0)}</td>
@@ -934,7 +957,7 @@ async function loadAdminData() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Retail</th><th>Fleet</th><th>Obj Σ</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Status</th></tr>
         ${rows}
       </table>`;
 
@@ -961,15 +984,17 @@ async function loadComparison() {
     const w2Label = document.getElementById('compareWeek2').selectedOptions[0].text;
 
     let rows = '';
-    let t1n=0,t1t=0,t1o=0,t2n=0,t2t=0,t2o=0;
+    let t1n=0,t1t=0,t1r=0,t1f=0,t2n=0,t2t=0,t2r=0,t2f=0;
 
     DEALERS.forEach(dealer => {
       const a = d1[dealer.code], b = d2[dealer.code];
-      const an = a?.totalNav||0, at = a?.totalTJ||0, ao = a?.totalObj||0;
-      const bn = b?.totalNav||0, bt = b?.totalTJ||0, bo = b?.totalObj||0;
-      const dn = bn-an, dt = bt-at, dobj = bo-ao;
+      const an = a?.totalNav||0, at = a?.totalTJ||0;
+      const ar = a?.totalObjR ?? a?.totalObj ?? 0, af = a?.totalObjF ?? 0;
+      const bn = b?.totalNav||0, bt = b?.totalTJ||0;
+      const br = b?.totalObjR ?? b?.totalObj ?? 0, bf = b?.totalObjF ?? 0;
+      const ao = ar+af, bo = br+bf;
 
-      t1n+=an;t1t+=at;t1o+=ao;t2n+=bn;t2t+=bt;t2o+=bo;
+      t1n+=an;t1t+=at;t1r+=ar;t1f+=af;t2n+=bn;t2t+=bt;t2r+=br;t2f+=bf;
 
       const fmt = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
 
@@ -977,11 +1002,12 @@ async function loadComparison() {
         <td>${dealer.name}</td>
         <td>${an||'–'}</td><td>${at||'–'}</td><td>${ao||'–'}</td>
         <td>${bn||'–'}</td><td>${bt||'–'}</td><td>${bo||'–'}</td>
-        <td>${fmt(dn)}</td><td>${fmt(dt)}</td><td>${fmt(dobj)}</td>
+        <td>${fmt(bn-an)}</td><td>${fmt(bt-at)}</td><td>${fmt(bo-ao)}</td>
       </tr>`;
     });
 
     const fmtT = v => v > 0 ? `<span class="delta-pos">+${v}</span>` : v < 0 ? `<span class="delta-neg">${v}</span>` : '–';
+    const t1o=t1r+t1f, t2o=t2r+t2f;
     rows += `<tr class="total-row">
       <td>SPOLU</td>
       <td>${t1n}</td><td>${t1t}</td><td>${t1o}</td>
@@ -1011,7 +1037,7 @@ async function loadModelsTab() {
     const data = snap.val() || {};
 
     const modelTotals = {};
-    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, obj: 0 }; });
+    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, objR: 0, objF: 0 }; });
 
     Object.values(data).forEach(dealer => {
       if (dealer.models) {
@@ -1019,26 +1045,28 @@ async function loadModelsTab() {
           if (modelTotals[mid]) {
             modelTotals[mid].nav += vals.nav || 0;
             modelTotals[mid].tj += vals.tj || 0;
-            modelTotals[mid].obj += vals.obj || 0;
+            modelTotals[mid].objR += vals.objR ?? vals.obj ?? 0;
+            modelTotals[mid].objF += vals.objF ?? 0;
           }
         });
       }
     });
 
     let rows = '';
-    let tn=0, tt=0, to2=0;
+    let tn=0, tt=0, tr2=0, tf2=0;
     MODELS.forEach(m => {
       const v = modelTotals[m.id];
+      const obj = v.objR + v.objF;
       const conv = v.nav > 0 ? Math.round(v.tj/v.nav*100) : 0;
       const brand = m.brand === 'omoda' ? '<span class="brand-tag brand-omoda">O</span>' : '<span class="brand-tag brand-jaecoo">J</span>';
-      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.obj}</td><td>${conv}%</td></tr>`;
-      tn += v.nav; tt += v.tj; to2 += v.obj;
+      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.objR}</td><td>${v.objF}</td><td>${obj}</td><td>${conv}%</td></tr>`;
+      tn += v.nav; tt += v.tj; tr2 += v.objR; tf2 += v.objF;
     });
-    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${to2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td></tr>`;
+    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${tr2}</td><td>${tf2}</td><td>${tr2+tf2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td></tr>`;
 
     document.getElementById('modelsTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Objednávky</th><th>Konverzia TJ</th></tr>
+        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Retail</th><th>Fleet</th><th>Obj Σ</th><th>Conv TJ</th></tr>
         ${rows}
       </table>`;
 
@@ -1088,7 +1116,7 @@ async function loadModelsTabRange() {
     const snaps = await Promise.all(weekKeys.map(k => db.ref(`showroom_traffic/${k}`).once('value')));
 
     const modelTotals = {};
-    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, obj: 0 }; });
+    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, objR: 0, objF: 0 }; });
 
     let weeksWithData = 0;
     snaps.forEach(snap => {
@@ -1100,7 +1128,8 @@ async function loadModelsTabRange() {
             if (modelTotals[mid]) {
               modelTotals[mid].nav += vals.nav || 0;
               modelTotals[mid].tj += vals.tj || 0;
-              modelTotals[mid].obj += vals.obj || 0;
+              modelTotals[mid].objR += vals.objR ?? vals.obj ?? 0;
+              modelTotals[mid].objF += vals.objF ?? 0;
             }
           });
         }
@@ -1108,20 +1137,21 @@ async function loadModelsTabRange() {
     });
 
     let rows = '';
-    let tn=0, tt=0, to2=0;
+    let tn=0, tt=0, tr2=0, tf2=0;
     MODELS.forEach(m => {
       const v = modelTotals[m.id];
+      const obj = v.objR + v.objF;
       const conv = v.nav > 0 ? Math.round(v.tj/v.nav*100) : 0;
       const brand = m.brand === 'omoda' ? '<span class="brand-tag brand-omoda">O</span>' : '<span class="brand-tag brand-jaecoo">J</span>';
-      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.obj}</td><td>${conv}%</td></tr>`;
-      tn += v.nav; tt += v.tj; to2 += v.obj;
+      rows += `<tr><td>${brand} ${m.name}</td><td>${v.nav}</td><td>${v.tj}</td><td>${v.objR}</td><td>${v.objF}</td><td>${obj}</td><td>${conv}%</td></tr>`;
+      tn += v.nav; tt += v.tj; tr2 += v.objR; tf2 += v.objF;
     });
-    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${to2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td></tr>`;
+    rows += `<tr class="total-row"><td>SPOLU</td><td>${tn}</td><td>${tt}</td><td>${tr2}</td><td>${tf2}</td><td>${tr2+tf2}</td><td>${tn>0?Math.round(tt/tn*100):0}%</td></tr>`;
 
     document.getElementById('modelsTable').innerHTML = `
       <div style="text-align:center;margin-bottom:12px;color:var(--text-light);font-size:13px">${lastModelsRangeLabel} — ${weeksWithData}/${weekKeys.length} týždňov s dátami</div>
       <table class="data-table">
-        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Objednávky</th><th>Konverzia TJ</th></tr>
+        <tr><th>Model</th><th>Návštevy</th><th>Test. jazdy</th><th>Retail</th><th>Fleet</th><th>Obj Σ</th><th>Conv TJ</th></tr>
         ${rows}
       </table>`;
 
@@ -1354,11 +1384,12 @@ async function loadAdminDataRange() {
 
       Object.entries(weekData).forEach(([code, d]) => {
         if (!agg[code]) {
-          agg[code] = { totalNav: 0, totalTJ: 0, totalObj: 0, age: { '18_30': 0, '31_45': 0, '46_60': 0, '60_plus': 0 }, weekCount: 0 };
+          agg[code] = { totalNav: 0, totalTJ: 0, totalObjR: 0, totalObjF: 0, age: { '18_30': 0, '31_45': 0, '46_60': 0, '60_plus': 0 }, weekCount: 0 };
         }
         agg[code].totalNav += d.totalNav || 0;
         agg[code].totalTJ += d.totalTJ || 0;
-        agg[code].totalObj += d.totalObj || 0;
+        agg[code].totalObjR += d.totalObjR ?? d.totalObj ?? 0;
+        agg[code].totalObjF += d.totalObjF ?? 0;
         if (d.age) {
           agg[code].age['18_30'] += d.age['18_30'] || 0;
           agg[code].age['31_45'] += d.age['31_45'] || 0;
@@ -1373,18 +1404,20 @@ async function loadAdminDataRange() {
 
     // Stats
     const reported = Object.keys(agg).length;
-    let totalNav = 0, totalTJ = 0, totalObj = 0;
+    let totalNav = 0, totalTJ = 0, totalObjR = 0, totalObjF = 0;
     Object.values(agg).forEach(d => {
       totalNav += d.totalNav;
       totalTJ += d.totalTJ;
-      totalObj += d.totalObj;
+      totalObjR += d.totalObjR;
+      totalObjF += d.totalObjF;
     });
+    const totalObj = totalObjR + totalObjF;
     const convTJ = totalNav > 0 ? Math.round(totalTJ / totalNav * 100) : 0;
 
     document.getElementById('statsRow').innerHTML = `
       <div class="stat-card"><div class="stat-label">Návštevy celkom</div><div class="stat-value">${totalNav}</div><div class="stat-sub">${lastRangeLabel}</div></div>
       <div class="stat-card"><div class="stat-label">Testovacie jazdy</div><div class="stat-value">${totalTJ}</div><div class="stat-sub">Konverzia: ${convTJ}%</div></div>
-      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">${totalNav > 0 ? (totalObj/totalNav*100).toFixed(1) : 0}% z návštev</div></div>
+      <div class="stat-card"><div class="stat-label">Objednávky</div><div class="stat-value">${totalObj}</div><div class="stat-sub">Retail: ${totalObjR} | Fleet: ${totalObjF}</div></div>
       <div class="stat-card"><div class="stat-label">Týždne s dátami</div><div class="stat-value">${weeksWithData.size} / ${weekKeys.length}</div><div class="stat-sub">Dílerov reportovalo: ${reported}</div></div>
     `;
 
@@ -1399,20 +1432,22 @@ async function loadAdminDataRange() {
           <td>${dealer.name}</td>
           <td><strong>${d.totalNav}</strong></td>
           <td>${d.totalTJ}</td>
-          <td>${d.totalObj}</td>
+          <td>${d.totalObjR}</td>
+          <td>${d.totalObjF}</td>
+          <td>${d.totalObjR + d.totalObjF}</td>
           <td>${d.totalNav > 0 ? Math.round(d.totalTJ/d.totalNav*100) : 0}%</td>
           <td>${d.age['18_30']}</td><td>${d.age['31_45']}</td><td>${d.age['46_60']}</td><td>${d.age['60_plus']}</td>
           <td>${d.weekCount}/${weekKeys.length}</td>
         </tr>`;
       } else {
         rows += `<tr style="opacity:0.5">
-          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>0/${weekKeys.length}</td>
+          <td>${dealer.name}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>0/${weekKeys.length}</td>
         </tr>`;
       }
     });
 
     rows += `<tr class="total-row">
-      <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObj}</td>
+      <td>SPOLU</td><td>${totalNav}</td><td>${totalTJ}</td><td>${totalObjR}</td><td>${totalObjF}</td><td>${totalObj}</td>
       <td>${convTJ}%</td>
       <td>${Object.values(agg).reduce((s,d)=>s+d.age['18_30'],0)}</td>
       <td>${Object.values(agg).reduce((s,d)=>s+d.age['31_45'],0)}</td>
@@ -1423,7 +1458,7 @@ async function loadAdminDataRange() {
 
     document.getElementById('dealerTable').innerHTML = `
       <table class="data-table">
-        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Obj</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
+        <tr><th>Díler</th><th>Nav</th><th>TJ</th><th>Retail</th><th>Fleet</th><th>Obj Σ</th><th>Conv TJ</th><th>18-30</th><th>31-45</th><th>46-60</th><th>60+</th><th>Týždne</th></tr>
         ${rows}
       </table>`;
 
