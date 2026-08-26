@@ -1045,6 +1045,51 @@ async function loadComparison() {
   }
 }
 
+// ── Agregácia po modeloch (zdieľaná pre tab Modely aj pre Excel export) ──
+function emptyModelTotals() {
+  const t = {};
+  MODELS.forEach(m => { t[m.id] = { nav: 0, tj: 0, objR: 0, objF: 0 }; });
+  return t;
+}
+
+function addWeekToModelTotals(totals, weekData) {
+  Object.values(weekData || {}).forEach(dealer => {
+    if (!dealer.models) return;
+    Object.entries(dealer.models).forEach(([mid, vals]) => {
+      if (!totals[mid]) return;
+      totals[mid].nav  += vals.nav || 0;
+      totals[mid].tj   += vals.tj || 0;
+      totals[mid].objR += vals.objR ?? vals.obj ?? 0;
+      totals[mid].objF += vals.objF ?? 0;
+    });
+  });
+  return totals;
+}
+
+// Hárok "Modely" pre Excel export — objednávky po jednotlivých modeloch
+function buildModelsAoa(totals) {
+  const data = [['Model', 'Značka', 'Návštevy', 'Test. jazdy', 'Obj. Retail', 'Obj. Fleet', 'Obj. spolu', 'Conv TJ %']];
+  const isHeader = [true];
+  const sum = { nav: 0, tj: 0, objR: 0, objF: 0 };
+  const conv = v => v.nav > 0 ? Math.round(v.tj / v.nav * 100) : 0;
+
+  ['omoda', 'jaecoo'].forEach(brand => {
+    const bs = { nav: 0, tj: 0, objR: 0, objF: 0 };
+    MODELS.filter(m => m.brand === brand).forEach(m => {
+      const v = totals[m.id] || { nav: 0, tj: 0, objR: 0, objF: 0 };
+      data.push([m.name, brand.toUpperCase(), v.nav, v.tj, v.objR, v.objF, v.objR + v.objF, conv(v)]);
+      isHeader.push(false);
+      ['nav', 'tj', 'objR', 'objF'].forEach(k => { bs[k] += v[k]; sum[k] += v[k]; });
+    });
+    data.push([brand.toUpperCase() + ' SPOLU', '', bs.nav, bs.tj, bs.objR, bs.objF, bs.objR + bs.objF, conv(bs)]);
+    isHeader.push(false);
+  });
+
+  data.push(['SPOLU', '', sum.nav, sum.tj, sum.objR, sum.objF, sum.objR + sum.objF, conv(sum)]);
+  isHeader.push(false);
+  return { data, isHeader };
+}
+
 // ── Models Tab ──
 async function loadModelsTab() {
   const weekKey = document.getElementById('modelsWeekSelect').value;
@@ -1053,21 +1098,7 @@ async function loadModelsTab() {
     const snap = await db.ref(`showroom_traffic/${weekKey}`).once('value');
     const data = snap.val() || {};
 
-    const modelTotals = {};
-    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, objR: 0, objF: 0 }; });
-
-    Object.values(data).forEach(dealer => {
-      if (dealer.models) {
-        Object.entries(dealer.models).forEach(([mid, vals]) => {
-          if (modelTotals[mid]) {
-            modelTotals[mid].nav += vals.nav || 0;
-            modelTotals[mid].tj += vals.tj || 0;
-            modelTotals[mid].objR += vals.objR ?? vals.obj ?? 0;
-            modelTotals[mid].objF += vals.objF ?? 0;
-          }
-        });
-      }
-    });
+    const modelTotals = addWeekToModelTotals(emptyModelTotals(), data);
 
     let rows = '';
     let tn=0, tt=0, tr2=0, tf2=0;
@@ -1132,25 +1163,12 @@ async function loadModelsTabRange() {
   try {
     const snaps = await Promise.all(weekKeys.map(k => db.ref(`showroom_traffic/${k}`).once('value')));
 
-    const modelTotals = {};
-    MODELS.forEach(m => { modelTotals[m.id] = { nav: 0, tj: 0, objR: 0, objF: 0 }; });
-
+    const modelTotals = emptyModelTotals();
     let weeksWithData = 0;
     snaps.forEach(snap => {
       const weekData = snap.val() || {};
       if (Object.keys(weekData).length > 0) weeksWithData++;
-      Object.values(weekData).forEach(dealer => {
-        if (dealer.models) {
-          Object.entries(dealer.models).forEach(([mid, vals]) => {
-            if (modelTotals[mid]) {
-              modelTotals[mid].nav += vals.nav || 0;
-              modelTotals[mid].tj += vals.tj || 0;
-              modelTotals[mid].objR += vals.objR ?? vals.obj ?? 0;
-              modelTotals[mid].objF += vals.objF ?? 0;
-            }
-          });
-        }
-      });
+      addWeekToModelTotals(modelTotals, weekData);
     });
 
     let rows = '';
@@ -1208,7 +1226,8 @@ function switchAdminTab(tab) {
 }
 
 // ── Excel Export ──
-function tableToXlsx(table, filename, title) {
+// Prevedie HTML tabuľku na pole riadkov
+function tableToAoa(table) {
   const data = [];
   const isHeader = [];
   table.querySelectorAll('tr').forEach(row => {
@@ -1224,11 +1243,14 @@ function tableToXlsx(table, filename, title) {
     data.push(cells);
   });
 
-  const wb = XLSX.utils.book_new();
+  return { data, isHeader };
+}
 
-  // Title row + empty row + data
-  const sheetData = [[title || filename.replace('.xlsx','')], [], ...data];
+// Postaví jeden naformátovaný hárok z poľa riadkov
+function buildStyledSheet(data, isHeader, title) {
+  const sheetData = [[title || ''], [], ...data];
   const ws = XLSX.utils.aoa_to_sheet(sheetData);
+  if (!data.length) return ws;
 
   const cols = data[0] ? data[0].length : 1;
   const headerStyle = {
@@ -1292,7 +1314,7 @@ function tableToXlsx(table, filename, title) {
       if (!ws[addr]) ws[addr] = { v: val || '', t: typeof val === 'number' ? 'n' : 's' };
       if (isHead) {
         ws[addr].s = headerStyle;
-      } else if (isLastRow && String(row[0]).includes('SPOLU')) {
+      } else if (String(row[0]).toUpperCase().includes('SPOLU')) {
         ws[addr].s = totalStyle;
         if (ci > 0) ws[addr].s = { ...totalStyle, alignment: { horizontal: 'center' } };
       } else {
@@ -1324,16 +1346,41 @@ function tableToXlsx(table, filename, title) {
   // Row heights
   ws['!rows'] = [{ hpt: 32 }, { hpt: 8 }];
 
-  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  return ws;
+}
+
+// Zapíše jeden alebo viac hárkov do jedného Excel súboru
+function sheetsToXlsx(sheets, filename) {
+  const wb = XLSX.utils.book_new();
+  sheets.forEach(s => XLSX.utils.book_append_sheet(wb, buildStyledSheet(s.data, s.isHeader, s.title), s.name));
   XLSX.writeFile(wb, filename);
 }
 
-function exportExcel() {
+function tableToXlsx(table, filename, title) {
+  const { data, isHeader } = tableToAoa(table);
+  sheetsToXlsx([{ name: 'Data', data, isHeader, title: title || filename.replace('.xlsx','') }], filename);
+}
+
+async function exportExcel() {
   const table = document.querySelector('#dealerTable table');
   if (!table) return;
-  const weekLabel = document.getElementById('adminWeekSelect').selectedOptions[0].text.split('(')[0].trim();
+  const weekKey = document.getElementById('adminWeekSelect').value;
   const weekFull = document.getElementById('adminWeekSelect').selectedOptions[0].text;
-  tableToXlsx(table, `Showroom_Traffic_${weekLabel}.xlsx`, `O&J Showroom Traffic — ${weekFull}`);
+  const weekLabel = weekFull.split('(')[0].trim();
+
+  const dealers = tableToAoa(table);
+  const sheets = [{ name: 'Díleri', data: dealers.data, isHeader: dealers.isHeader, title: `O&J Showroom Traffic — ${weekFull}` }];
+
+  try {
+    const snap = await db.ref(`showroom_traffic/${weekKey}`).once('value');
+    const models = buildModelsAoa(addWeekToModelTotals(emptyModelTotals(), snap.val() || {}));
+    sheets.push({ name: 'Modely', data: models.data, isHeader: models.isHeader, title: `O&J Objednávky po modeloch — ${weekFull}` });
+  } catch (err) {
+    console.error(err);
+    showToast('Hárok Modely sa nepodarilo načítať — export obsahuje len dílerov', 'error');
+  }
+
+  sheetsToXlsx(sheets, `Showroom_Traffic_${weekLabel}.xlsx`);
   showToast('Export stiahnutý', 'success');
 }
 
@@ -1350,6 +1397,7 @@ function exportCompareExcel() {
 let overviewMode = 'week';
 let lastRangeData = null;
 let lastRangeLabel = '';
+let lastRangeWeekKeys = [];
 
 function setOverviewMode(mode) {
   overviewMode = mode;
@@ -1386,6 +1434,7 @@ async function loadAdminDataRange() {
   const fromLabel = opts[fromIdx].label;
   const toLabel = opts[toIdx].label;
   lastRangeLabel = `${fromLabel.split('(')[0].trim()} – ${toLabel.split('(')[0].trim()} (${weekKeys.length} týžd.)`;
+  lastRangeWeekKeys = weekKeys;
 
   try {
     // Fetch all weeks in parallel
@@ -1489,11 +1538,26 @@ async function loadAdminDataRange() {
   }
 }
 
-function exportExcelRange() {
+async function exportExcelRange() {
   const table = document.querySelector('#dealerTable table');
   if (!table) { showToast('Najprv klikni Zobraziť', 'error'); return; }
   const filename = `Showroom_Traffic_${lastRangeLabel.replace(/[^a-zA-Z0-9_–]/g, '_')}.xlsx`;
-  tableToXlsx(table, filename, `O&J Showroom Traffic — ${lastRangeLabel}`);
+
+  const dealers = tableToAoa(table);
+  const sheets = [{ name: 'Díleri', data: dealers.data, isHeader: dealers.isHeader, title: `O&J Showroom Traffic — ${lastRangeLabel}` }];
+
+  try {
+    const snaps = await Promise.all(lastRangeWeekKeys.map(k => db.ref(`showroom_traffic/${k}`).once('value')));
+    const totals = emptyModelTotals();
+    snaps.forEach(snap => addWeekToModelTotals(totals, snap.val() || {}));
+    const models = buildModelsAoa(totals);
+    sheets.push({ name: 'Modely', data: models.data, isHeader: models.isHeader, title: `O&J Objednávky po modeloch — ${lastRangeLabel}` });
+  } catch (err) {
+    console.error(err);
+    showToast('Hárok Modely sa nepodarilo načítať — export obsahuje len dílerov', 'error');
+  }
+
+  sheetsToXlsx(sheets, filename);
   showToast('Export stiahnutý', 'success');
 }
 
